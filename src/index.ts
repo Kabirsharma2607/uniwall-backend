@@ -10,4 +10,12 @@ app.get("/hello-world", (req, res) => {
   });
 });
 
+app.post("/hello-world", (req, res) => {
+  const body = req.body;
+
+  console.log(body);
+
+  res.send("working");
+});
+
 app.listen(3000);
