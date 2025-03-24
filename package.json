@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "build": "tsc -b && node dist/index.js",
+    "run": "node dist/index.js"
+  },
   "dependencies": {
     "@types/express": "^5.0.1",
     "express": "^4.21.2"
