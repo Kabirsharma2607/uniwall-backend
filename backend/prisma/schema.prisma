@@ -32,7 +32,7 @@ model user_auth_details {
   user_id      String       @unique
   user         user_details @relation(fields: [user_id], references: [user_id])
   password     String
-  words_secret String
+  words_secret String       @unique
   created_at   DateTime     @default(now())
 
   @@index([row_id])
@@ -60,24 +60,3 @@ enum wallet_type {
   PALO
   ETH
 }
-
-/**
- * Table user_wallet_details {
- * row_id bigint [primary key]
- * user_id bigint [not null]
- * raw_user_id uuid [not null]
- * wallet_address varchar [not null]
- * wallet_type enum [not null]
- * created_at timestamp
- * updated_at timestamp
- * }
- * Ref user_auth_details: user_auth_details.user_id > user_details.row_id
- * Ref user_wallet_details: user_wallet_details.user_id > user_details.row_id
- * Ref user_wallet_details: user_wallet_details.raw_user_id > user_details.user_id
- * Enum wallet_types {
- * SOLANA
- * ETH
- * PALO
- * BTC
- * }
- */
