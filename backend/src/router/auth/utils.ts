@@ -37,6 +37,8 @@ export const generate24WordHash = () => {
   return Array.from({ length: totalWords }, generateWord);
 };
 
+//testing
+
 const isValidSecret = (secret: string[]): boolean => {
   return secret.every((word) => word.length === 4);
 };
