@@ -37,8 +37,6 @@ export const generate24WordHash = () => {
   return Array.from({ length: totalWords }, generateWord);
 };
 
-//testing
-
 const isValidSecret = (secret: string[]): boolean => {
   return secret.every((word) => word.length === 4);
 };
@@ -52,9 +50,9 @@ export const compareSecrets = (secretWord: string[], userOldSecret: string) => {
   return JSON.stringify(secretWord) === JSON.stringify(userSecretArray);
 };
 
-export function canUpdatePassword(lastUpdate: Date): boolean {
+export const canUpdatePassword = (lastUpdate: Date): boolean => {
   if (!lastUpdate) return true;
 
   const oneDayAgo = dayjs().subtract(1, "day");
   return dayjs(lastUpdate).isBefore(oneDayAgo);
-}
+};
