@@ -9,7 +9,7 @@
     "dev": "tsc -b"
   },
   "dependencies": {
-    "@kabir.26/uniwall-commons": "^1.0.4",
+    "@kabir.26/uniwall-commons": "^1.0.5",
     "@prisma/client": "^6.5.0",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.1",

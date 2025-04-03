@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 
 import {
   authSchema,
+  confirmCompletionSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
 } from "@kabir.26/uniwall-commons";
@@ -36,6 +37,11 @@ router.get("/login", async (req: Request, res: Response) => {
     });
     if (!user) {
       res.status(404).json({ success: false, message: "User not found" });
+      return;
+    }
+
+    if (user?.user_state === "INIT") {
+      res.status(403).json({ success: false, message: "User is not active" });
       return;
     }
 
@@ -100,6 +106,7 @@ router.post("/signup", async (req: Request, res: Response) => {
             words_secret: secretWord.join("-"),
           },
         },
+        user_state: "INIT",
       },
     });
     if (newUser) {
@@ -126,6 +133,49 @@ router.post("/signup", async (req: Request, res: Response) => {
     return;
   }
 });
+
+router.patch(
+  "/confirm-completion/:userId",
+  async (req: Request, res: Response) => {
+    try {
+      const { success, data, error } = confirmCompletionSchema.safeParse(
+        req.params
+      );
+      if (!success || error) {
+        res.status(404).json({
+          success: false,
+          message: "Invalid request parameters",
+        });
+      }
+      const { userId } = req.params;
+      const user = await prisma.user_details.update({
+        where: {
+          user_id: userId,
+        },
+        data: {
+          user_state: "COMPLETE",
+        },
+      });
+      if (user) {
+        res.status(200).json({
+          success: true,
+          message: "User completed joining",
+        });
+      } else {
+        res.status(404).json({
+          success: false,
+          message: "No user found",
+        });
+      }
+      return;
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
+  }
+);
 
 router.post("/forgot-password", async (req: Request, res: Response) => {
   try {

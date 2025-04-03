@@ -23,3 +23,9 @@ export const resetPasswordSchema = z.object({
 });
 
 export type ResetPasswordSchema = z.infer<typeof resetPasswordSchema>;
+
+export const confirmCompletionSchema = z.object({
+  userId: z.string(),
+});
+
+export type ConfirmCompletionSchema = z.infer<typeof confirmCompletionSchema>;

@@ -127,10 +127,10 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.25.1.tgz#7d79922cb2d88f9048f06393dbf62d2e4accb584"
   integrity sha512-Y1EQdcfwMSeQN/ujR5VayLOJ1BHaK+ssyk0AEzPjC+t1lITgsnccPqFjb6V+LsTp/9Iov4ysfjxLaGJ9RPtkVg==
 
-"@kabir.26/uniwall-commons@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@kabir.26/uniwall-commons/-/uniwall-commons-1.0.4.tgz#2ab4a1ec85140c9f763785825721fe749e1e79ac"
-  integrity sha512-D+UTivtOCYcT1jfzsPIg8mrNjE8COy72Nxr6Ir8N+tJO10KrZP3ROxACyGyaGVMINm6y52EwVjyIGwnqWmARxw==
+"@kabir.26/uniwall-commons@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/@kabir.26/uniwall-commons/-/uniwall-commons-1.0.5.tgz#960cedc971eb835d9507cabdccaa1a83ca1ee79d"
+  integrity sha512-FQL1CTQsHgN4BM4a1QUINY06F0ZX7voXYXoBwV1OLtaAtaIf8o9fcapCd9XNWmlpfdonUwB+fMZRqqyAaOpEBg==
   dependencies:
     zod "^3.24.2"
 
