@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
-import { nanoid } from "nanoid";
+// import { nanoid } from "nanoid";
+import * as nanoid from 'nanoid'
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import dayjs from "dayjs";
@@ -31,7 +32,7 @@ export const generate24WordHash = () => {
   const totalWords = 24;
 
   const generateWord = (): string => {
-    return nanoid(wordLength);
+    return nanoid.nanoid(wordLength);
   };
 
   return Array.from({ length: totalWords }, generateWord);
