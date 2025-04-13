@@ -1,9 +1,12 @@
 import bcrypt from "bcrypt";
-import { nanoid } from "nanoid";
+// import { nanoid } from "nanoid";
+// import * as nanoid from 'nanoid'
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import dayjs from "dayjs";
-
+import { customAlphabet } from 'nanoid';
+const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#@%$*&^/'; // exclude '-'
+const nanoid = customAlphabet(alphabet, 21); // 21 is default length
 dotenv.config();
 
 const saltRounds = Number(process.env.SALT_ROUNDS);
@@ -50,9 +53,9 @@ export const compareSecrets = (secretWord: string[], userOldSecret: string) => {
   return JSON.stringify(secretWord) === JSON.stringify(userSecretArray);
 };
 
-export function canUpdatePassword(lastUpdate: Date): boolean {
+export const canUpdatePassword = (lastUpdate: Date): boolean => {
   if (!lastUpdate) return true;
 
   const oneDayAgo = dayjs().subtract(1, "day");
   return dayjs(lastUpdate).isBefore(oneDayAgo);
-}
+};

@@ -14,12 +14,12 @@ datasource db {
 }
 
 model user_details {
-  row_id     BigInt   @id @default(autoincrement())
-  user_id    String   @unique @default(uuid())
-  username   String   @unique
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
+  row_id            BigInt                @id @default(autoincrement())
+  user_id           String                @unique @default(uuid())
+  username          String                @unique
+  created_at        DateTime              @default(now())
+  updated_at        DateTime              @updatedAt
+  user_state        user_state?
   user_auth_details user_auth_details?
   wallets           user_wallet_details[]
 
@@ -59,4 +59,9 @@ enum wallet_type {
   BTC
   PALO
   ETH
+}
+
+enum user_state {
+  INIT
+  COMPLETE
 }
