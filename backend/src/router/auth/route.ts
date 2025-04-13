@@ -355,9 +355,6 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   }
 });
 
-export const authRouter = router;
-
-
 router.get("/words-secret/:username", async(req: Request, res: Response) => {
   try{
     console.log(req)
@@ -385,3 +382,5 @@ router.get("/words-secret/:username", async(req: Request, res: Response) => {
     return
   }
 })
+
+export const authRouter = router;

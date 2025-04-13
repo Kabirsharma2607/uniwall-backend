@@ -29,3 +29,14 @@ export const confirmCompletionSchema = z.object({
 });
 
 export type ConfirmCompletionSchema = z.infer<typeof confirmCompletionSchema>;
+
+export const Wallets = z.enum([
+  'BTC',
+  'ETH',
+  'SOL',
+  'PALO'
+]);
+
+export const selectedWallteSchema = z.object({
+  wallets: z.array(Wallets)
+})
