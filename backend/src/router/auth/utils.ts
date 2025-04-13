@@ -1,10 +1,12 @@
 import bcrypt from "bcrypt";
 // import { nanoid } from "nanoid";
-import * as nanoid from 'nanoid'
+// import * as nanoid from 'nanoid'
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import dayjs from "dayjs";
-
+import { customAlphabet } from 'nanoid';
+const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#@%$*&^/'; // exclude '-'
+const nanoid = customAlphabet(alphabet, 21); // 21 is default length
 dotenv.config();
 
 const saltRounds = Number(process.env.SALT_ROUNDS);
@@ -32,7 +34,7 @@ export const generate24WordHash = () => {
   const totalWords = 24;
 
   const generateWord = (): string => {
-    return nanoid.nanoid(wordLength);
+    return nanoid(wordLength);
   };
 
   return Array.from({ length: totalWords }, generateWord);

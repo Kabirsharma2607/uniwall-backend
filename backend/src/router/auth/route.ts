@@ -356,3 +356,32 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 });
 
 export const authRouter = router;
+
+
+router.get("/words-secret/:username", async(req: Request, res: Response) => {
+  try{
+    console.log(req)
+    const {username} = req.params
+    const wordsSecret = await prisma.user_details.findUnique({
+      where: {
+        username, 
+      },
+      include: {
+        user_auth_details: {
+          select: {
+            words_secret: true
+          }
+        }
+      }
+    })
+    res.status(200).json({
+      success: true,
+      data: wordsSecret?.user_auth_details?.words_secret.split("-"),
+      message: "Your words secret"
+    })
+    return;
+  }catch(e){
+    res.status(500).send("Internal server error");
+    return
+  }
+})
