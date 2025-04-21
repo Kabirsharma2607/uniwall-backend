@@ -7,7 +7,7 @@ type GeneratedWalletKeyPairsType =  {
     keyPair : GeneratedWalletType;
 }
 
-export const createWallets = async (requestedWallets: WalletType[]) => {
+export const createWallets = (requestedWallets: WalletType[]) => {
     const response : GeneratedWalletKeyPairsType[] = [];
     for (const wallet of requestedWallets){
         switch (wallet){

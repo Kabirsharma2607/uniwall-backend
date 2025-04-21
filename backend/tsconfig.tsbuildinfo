@@ -1,1 +1,1 @@
-{"root":["./src/index.ts","./src/router/middleware.ts","./src/router/route.ts","./src/router/auth/route.ts","./src/router/auth/utils.ts","./src/router/wallet/route.ts"],"version":"5.8.3"}
+{"root":["./src/index.ts","./src/types.ts","./src/router/middleware.ts","./src/router/route.ts","./src/router/auth/route.ts","./src/router/auth/utils.ts","./src/router/wallet/route.ts","./src/router/wallet/utils.ts","./src/wallet-functions/solana.ts"],"version":"5.8.3"}

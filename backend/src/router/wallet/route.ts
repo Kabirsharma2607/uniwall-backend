@@ -1,12 +1,15 @@
 import {Request, Response, Router} from "express"
 import {middleware} from "../middleware"
+import { createWallets } from "./utils";
 
 const router = Router();
 
 router.use(middleware);
 
 router.get("/health", async(req: Request, res: Response) => {
-    res.status(200).send("Ho gaya yaar");
+    const response = createWallets(["SOL"]);
+
+    res.status(200).json({data: response});
     return;
 })
 
