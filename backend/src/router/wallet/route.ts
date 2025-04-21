@@ -10,4 +10,12 @@ router.get("/health", async(req: Request, res: Response) => {
     return;
 })
 
+router.post("/select-wallet", async (req: Request, res: Response) => {
+    try {
+        
+    } catch(e) {
+
+    }
+})
+
 export const walletRouter = router;
