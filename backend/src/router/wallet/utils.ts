@@ -15,4 +15,5 @@ export const createWallets = async (requestedWallets: WalletType[]) => {
                 response.push({walletType: wallet, keyPair: createSolanaWallet()});
         }
     }
+    return response;
 };
