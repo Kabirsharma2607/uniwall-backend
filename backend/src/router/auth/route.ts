@@ -22,7 +22,7 @@ const prisma = new PrismaClient();
 
 router.post("/login", async (req: Request, res: Response) => {
   console.log("Login request body:", req.body);
-  
+
   try {
     const { success, data } = authSchema.safeParse(req.body);
     if (!success) {
@@ -74,10 +74,10 @@ router.post("/login", async (req: Request, res: Response) => {
 router.post("/signup", async (req: Request, res: Response) => {
   try {
     console.log("Signup request body:", req.body);
-    
+
     const { success, data, error } = authSchema.safeParse(req.body);
     if (error || !success) {
-      res.status(400).json({
+      res.status(200).json({
         success: false,
         message: "Invalid body",
       });
@@ -92,10 +92,11 @@ router.post("/signup", async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      res.status(404).json({
+      res.status(200).json({
         success: false,
         message: "User already exists",
       });
+      return;
     }
     const hashedPassword = await generateHash(password);
 
@@ -131,7 +132,7 @@ router.post("/signup", async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.log("Error in signup:", error);
-    
+
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -185,7 +186,7 @@ router.patch(
 
 router.post("/forgot-password", async (req: Request, res: Response) => {
   try {
-    await prisma.$transaction(async (tx : any) => {
+    await prisma.$transaction(async (tx: any) => {
       const { success, data, error } = forgotPasswordSchema.safeParse(req.body);
       if (!success || error) {
         res.status(400).json({
@@ -265,7 +266,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
 
 router.post("/reset-password", async (req: Request, res: Response) => {
   try {
-    await prisma.$transaction(async (tx : any) => {
+    await prisma.$transaction(async (tx: any) => {
       const { success, data, error } = resetPasswordSchema.safeParse(req.body);
       if (!success || error) {
         res.status(400).json({
