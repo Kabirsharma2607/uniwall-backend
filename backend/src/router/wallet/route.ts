@@ -7,8 +7,8 @@ const router = Router();
 router.use(middleware);
 
 router.get("/health", async(req: Request, res: Response) => {
-    const response = createWallets(["SOL"]);
-
+    const response = await createWallets(["SOL", "ETH", "PALO", "BTC"]);
+    console.log(response);
     res.status(200).json({data: response});
     return;
 })

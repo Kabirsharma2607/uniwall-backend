@@ -1,4 +1,4 @@
 export type GeneratedWalletType = {
     publicKey: string;
-    privateKey: number[];
+    privateKey: string | number[];
 }

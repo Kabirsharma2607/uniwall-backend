@@ -7,6 +7,7 @@ export const createSolanaWallet = () : GeneratedWalletType => {
             publicKey: wallet.publicKey.toBase58(),
             privateKey: Array.from(wallet.secretKey)
         }
+        console.log(response);
         return response;
 
 } 
