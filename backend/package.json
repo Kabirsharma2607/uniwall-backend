@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -b && node dist/index.js",
     "start": "node dist/index.js",
-    "dev": "tsc -b"
+    "dev": "tsc -b",
+    "lint": "eslint ./src --ext .ts"
   },
   "dependencies": {
     "@kabir.26/uniwall-commons": "^1.0.7",
@@ -32,6 +33,9 @@
     "tiny-secp256k1": "^2.2.3"
   },
   "devDependencies": {
-    "typescript": "^5.8.3"
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.x"
   }
 }

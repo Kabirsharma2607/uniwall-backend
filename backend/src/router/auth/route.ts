@@ -14,6 +14,7 @@ import {
   generate24WordHash,
   generateAuthToken,
   generateHash,
+  getUserNextState,
 } from "./utils";
 
 const router = Router();
@@ -22,7 +23,7 @@ const prisma = new PrismaClient();
 
 router.post("/login", async (req: Request, res: Response) => {
   console.log("Login request body:", req.body);
-  
+
   try {
     const { success, data } = authSchema.safeParse(req.body);
     if (!success) {
@@ -42,8 +43,30 @@ router.post("/login", async (req: Request, res: Response) => {
       return;
     }
 
-    if (user?.user_state === "INIT") {
-      res.status(403).json({ success: false, message: "User is not active" });
+    if (user?.user_state !== "COMPLETED") {
+      switch (user?.user_state) {
+        case "INIT":
+          res.status(200).json({
+            success: false,
+            message: "User is not active",
+            deeplink: "/recovery",
+          });
+          break;
+        case "WORD_SECRET_COPIED":
+          res.status(200).json({
+            success: false,
+            message: "User has not selected any wallet",
+            deeplink: "/select-wallet",
+          });
+          break;
+        case "WALLET_SELECTED":
+          res.status(200).json({
+            success: false,
+            message: "User has not viewed dashboard",
+            deeplink: "/dashboard",
+          });
+          break;
+      }
       return;
     }
 
@@ -74,10 +97,10 @@ router.post("/login", async (req: Request, res: Response) => {
 router.post("/signup", async (req: Request, res: Response) => {
   try {
     console.log("Signup request body:", req.body);
-    
+
     const { success, data, error } = authSchema.safeParse(req.body);
     if (error || !success) {
-      res.status(400).json({
+      res.status(200).json({
         success: false,
         message: "Invalid body",
       });
@@ -92,10 +115,11 @@ router.post("/signup", async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      res.status(404).json({
+      res.status(200).json({
         success: false,
         message: "User already exists",
       });
+      return;
     }
     const hashedPassword = await generateHash(password);
 
@@ -131,7 +155,6 @@ router.post("/signup", async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.log("Error in signup:", error);
-    
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -141,7 +164,7 @@ router.post("/signup", async (req: Request, res: Response) => {
 });
 
 router.patch(
-  "/confirm-completion/:userId",
+  "/update-user-state/:userId",
   async (req: Request, res: Response) => {
     try {
       const { success, data, error } = confirmCompletionSchema.safeParse(
@@ -154,15 +177,20 @@ router.patch(
         });
       }
       const { userId } = req.params;
-      const user = await prisma.user_details.update({
+      const user = await prisma.user_details.findUnique({
         where: {
           user_id: userId,
         },
-        data: {
-          user_state: "COMPLETE",
-        },
       });
-      if (user) {
+      if (user?.user_state) {
+        await prisma.user_details.update({
+          where: {
+            user_id: userId,
+          },
+          data: {
+            user_state: getUserNextState(user.user_state),
+          },
+        });
         res.status(200).json({
           success: true,
           message: "User completed joining",
@@ -185,7 +213,7 @@ router.patch(
 
 router.post("/forgot-password", async (req: Request, res: Response) => {
   try {
-    await prisma.$transaction(async (tx : any) => {
+    await prisma.$transaction(async (tx: any) => {
       const { success, data, error } = forgotPasswordSchema.safeParse(req.body);
       if (!success || error) {
         res.status(400).json({
@@ -265,7 +293,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
 
 router.post("/reset-password", async (req: Request, res: Response) => {
   try {
-    await prisma.$transaction(async (tx : any) => {
+    await prisma.$transaction(async (tx: any) => {
       const { success, data, error } = resetPasswordSchema.safeParse(req.body);
       if (!success || error) {
         res.status(400).json({
@@ -355,32 +383,32 @@ router.post("/reset-password", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/words-secret/:username", async(req: Request, res: Response) => {
-  try{
-    console.log(req)
-    const {username} = req.params
+router.get("/words-secret/:username", async (req: Request, res: Response) => {
+  try {
+    console.log(req);
+    const { username } = req.params;
     const wordsSecret = await prisma.user_details.findUnique({
       where: {
-        username, 
+        username,
       },
       include: {
         user_auth_details: {
           select: {
-            words_secret: true
-          }
-        }
-      }
-    })
+            words_secret: true,
+          },
+        },
+      },
+    });
     res.status(200).json({
       success: true,
       data: wordsSecret?.user_auth_details?.words_secret.split("-"),
-      message: "Your words secret"
-    })
+      message: "Your words secret",
+    });
     return;
-  }catch(e){
+  } catch (e) {
     res.status(500).send("Internal server error");
-    return
+    return;
   }
-})
+});
 
 export const authRouter = router;

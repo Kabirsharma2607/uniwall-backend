@@ -4,8 +4,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import dayjs from "dayjs";
-import { customAlphabet } from 'nanoid';
-const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#@%$*&^/'; // exclude '-'
+import { customAlphabet } from "nanoid";
+import { user_state } from "@prisma/client";
+const alphabet =
+  "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz#@%$*&^/"; // exclude '-'
 const nanoid = customAlphabet(alphabet, 21); // 21 is default length
 dotenv.config();
 
@@ -58,4 +60,14 @@ export const canUpdatePassword = (lastUpdate: Date): boolean => {
 
   const oneDayAgo = dayjs().subtract(1, "day");
   return dayjs(lastUpdate).isBefore(oneDayAgo);
+};
+
+export const getUserNextState = (userState: user_state) => {
+  const nextUserState: Record<user_state, user_state | null> = {
+    INIT: "WORD_SECRET_COPIED",
+    WORD_SECRET_COPIED: "WALLET_SELECTED",
+    WALLET_SELECTED: "COMPLETED",
+    COMPLETED: null,
+  };
+  return nextUserState[userState];
 };
