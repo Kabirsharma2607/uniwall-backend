@@ -7,15 +7,22 @@ import { GeneratedWalletType } from "../types";
 const ECPair = ECPairFactory(ecc);
 
 export const createBitcoinWallet = (): GeneratedWalletType => {
-    const keyPair = ECPair.makeRandom();
+  const keyPair = ECPair.makeRandom();
 
-    // Ensure public key is a Node.js Buffer
-    const publicKeyBuffer = Buffer.from(keyPair.publicKey);
-    const { address } = bitcoin.payments.p2pkh({ pubkey: publicKeyBuffer });
+  // Ensure public key is a Node.js Buffer
+  const publicKeyBuffer = Buffer.from(keyPair.publicKey);
+  const { address } = bitcoin.payments.p2pkh({ pubkey: publicKeyBuffer });
 
-    const response: GeneratedWalletType = {
-        publicKey: address || "",
-        privateKey: keyPair.toWIF()
+  if (!address) {
+    return {
+      privateKey: "",
+      publicKey: "",
     };
-    return response;
+  }
+
+  const response: GeneratedWalletType = {
+    publicKey: address,
+    privateKey: keyPair.toWIF(),
+  };
+  return response;
 };
