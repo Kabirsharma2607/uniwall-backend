@@ -63,5 +63,7 @@ enum wallet_type {
 
 enum user_state {
   INIT
-  COMPLETE
+  WORD_SECRET_COPIED
+  WALLET_SELECTED
+  COMPLETED
 }
