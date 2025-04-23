@@ -66,8 +66,8 @@ export const getUserNextState = (userState: user_state) => {
   const nextUserState: Record<user_state, user_state | null> = {
     INIT: "WORD_SECRET_COPIED",
     WORD_SECRET_COPIED: "WALLET_SELECTED",
-    WALLET_SELECTED: "COMPLETED",
     COMPLETED: null,
+    WALLET_SELECTED: "COMPLETED",
   };
   return nextUserState[userState];
 };
