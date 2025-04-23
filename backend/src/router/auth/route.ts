@@ -83,6 +83,7 @@ router.post("/login", async (req: Request, res: Response) => {
       success: true,
       message: "User logged in successfully.",
       token: token,
+      deeplink: "/dashboard",
     });
     return;
   } catch (error) {
