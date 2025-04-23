@@ -46,21 +46,21 @@ router.post("/login", async (req: Request, res: Response) => {
     if (user?.user_state !== "COMPLETED") {
       switch (user?.user_state) {
         case "INIT":
-          res.status(403).json({
+          res.status(200).json({
             success: false,
             message: "User is not active",
             deeplink: "/recovery",
           });
           break;
         case "WORD_SECRET_COPIED":
-          res.status(403).json({
+          res.status(200).json({
             success: false,
             message: "User has not selected any wallet",
             deeplink: "/select-wallet",
           });
           break;
         case "WALLET_SELECTED":
-          res.status(403).json({
+          res.status(200).json({
             success: false,
             message: "User has not viewed dashboard",
             deeplink: "/dashboard",
