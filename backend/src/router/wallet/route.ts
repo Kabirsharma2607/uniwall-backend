@@ -1,11 +1,9 @@
 import { Request, Response, Router } from "express";
 import { middleware } from "../middleware";
 import { PrismaClient, wallet_type } from "@prisma/client";
-import { createWallets } from "./utils";
+import { createWallets, getAllBalances } from "./utils";
 import { selectedWalletSchema } from "@kabir.26/uniwall-commons";
-import { getSolanaBalance } from "../../wallet-functions/solana";
-import { getPolkadotBalance } from "../../wallet-functions/palo";
-import { getBitcoinBalance } from "../../wallet-functions/bitcoin";
+
 const prisma = new PrismaClient();
 const router = Router();
 
@@ -14,11 +12,9 @@ console.log("Entering Wallets");
 router.use(middleware);
 
 
-router.get("/health", (req: Request, res: Response) => {
-  // const response = await getBitcoinBalance(
-  //   "15wJKjr1QYCd4gJAsNQo8LGiGWk9sA5ruj"
-  // );
-  res.status(200).json({ message: "Health up" });
+router.get("/health", async (req: Request, res: Response) => {
+  const response = await getAllBalances(req.userId);
+  res.status(200).json({ message: "Health up", data : response });
   return; 
 });
 
