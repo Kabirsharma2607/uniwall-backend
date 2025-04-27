@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { middleware } from "../middleware";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, wallet_type } from "@prisma/client";
 import { createWallets } from "./utils";
 import { selectedWalletSchema } from "@kabir.26/uniwall-commons";
 import { getSolanaBalance } from "../../wallet-functions/solana";
@@ -79,5 +79,69 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
     });
   }
 });
+
+router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
+  console.log("Calling get-eligible-wallets");
+  try {
+    if (!req.userId) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid Request: Missing userId",
+      });
+      return;
+    }
+
+    const user = await prisma.user_details.findUnique({
+      where: {
+        user_id: req.userId,
+      },
+    });
+
+    if (!user) {
+      res.status(403).json({
+        success: false,
+        message: "User Not Found",
+      });
+      return;
+    }
+
+    const wallets = await prisma.user_wallet_details.findMany({
+      where: {
+        user_id: user.row_id,
+      },
+      select: {
+        wallet_type: true,
+      },
+    });
+
+    const allWalletTypes: wallet_type[] = [
+      wallet_type.SOL,
+      wallet_type.ETH,
+      wallet_type.PALO,
+      wallet_type.BTC,
+    ];
+
+    const existingWalletTypes = wallets.map(wallet => wallet.wallet_type);
+
+    const missingWalletTypes = allWalletTypes.filter(
+      type => !existingWalletTypes.includes(type)
+    );
+
+    res.status(200).json({
+      success: true,
+      data: missingWalletTypes,
+      message: "Eligible wallets fetched successfully",
+    });
+    
+    return;
+  } catch (e) {
+    console.error("Error in get-eligible-wallets:", e);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+});
+
 
 export const walletRouter = router;
