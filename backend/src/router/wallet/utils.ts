@@ -69,7 +69,7 @@ export const getAllBalances = async (userId?: string) => {
       wallet_address: true,
     },
   });
-
+  
   for (const wallet of userWallets) {
     const { wallet_type: type, wallet_address: address } = wallet;
 
@@ -99,3 +99,10 @@ export const getAllBalances = async (userId?: string) => {
 
   return balances;
 };
+
+export    const availableWalletTypes: wallet_type[] = [
+      wallet_type.SOL,
+      wallet_type.ETH,
+      wallet_type.PALO,
+      wallet_type.BTC,
+    ];
