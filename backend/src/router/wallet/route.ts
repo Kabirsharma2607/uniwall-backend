@@ -139,5 +139,4 @@ router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
   }
 });
 
-
 export const walletRouter = router;
