@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { user_state } from "@prisma/client";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ declare global {
 }
 
 export const middleware = (req:Request, res: Response, next: NextFunction) => {
+    console.log("Calling Middleware");
     try{
         const header = req.headers.authorization;
         if (!header || header.split(" ")[0] !== "Bearer"){
@@ -25,8 +27,9 @@ export const middleware = (req:Request, res: Response, next: NextFunction) => {
             return;
         }
         const token = header.split(" ")[1];
-        const decoded = jwt.verify(token, JWT_SECRET) as {userId: string, username: string};
-        
+        console.log(token);
+        const decoded = jwt.verify(token, JWT_SECRET) as {userId: string, username: string, userState: user_state};
+        console.log(decoded);
         req.userId = decoded.userId;
         req.username = decoded.username;
         

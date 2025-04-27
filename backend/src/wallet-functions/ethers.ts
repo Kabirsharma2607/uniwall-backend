@@ -9,3 +9,4 @@ export const createEthereumWallet = (): GeneratedWalletType => {
   };
   return response;
 };
+

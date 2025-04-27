@@ -20,6 +20,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
+    "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "bitcoinjs-lib": "^6.1.7",
     "cors": "^2.8.5",

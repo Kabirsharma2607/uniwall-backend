@@ -69,16 +69,15 @@ router.post("/login", async (req: Request, res: Response) => {
       }
       return;
     }
-
     const isPasswordValid = await comparePasswords(
       password,
-      user.user_auth_details?.password!
+      user?.user_auth_details?.password!
     );
     if (!isPasswordValid) {
       res.status(401).json({ success: false, message: "Invalid credentials" });
       return;
     }
-    const token = generateAuthToken(user.user_id, username);
+    const token = generateAuthToken(user.user_id, username, user.user_state);
     res.status(200).json({
       success: true,
       message: "User logged in successfully.",
@@ -95,6 +94,7 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 router.post("/signup", async (req: Request, res: Response) => {
+  console.log(req.body);
   try {
     console.log("Signup request body:", req.body);
 
@@ -138,7 +138,8 @@ router.post("/signup", async (req: Request, res: Response) => {
       },
     });
     if (newUser) {
-      const authToken = generateAuthToken(newUser.user_id, username);
+      console.log(newUser.user_state);
+      const authToken = generateAuthToken(newUser.user_id, username, newUser.user_state);
       res.status(200).json({
         success: true,
         message: "User signed up successfully",
@@ -273,7 +274,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
-      const authToken = generateAuthToken(user.user_id, username);
+      const authToken = generateAuthToken(user.user_id, username, user.user_state);
       res.status(200).json({
         success: true,
         message: "Password reset successfully",
@@ -365,7 +366,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
-      const authToken = generateAuthToken(user.user_id, username);
+      const authToken = generateAuthToken(user.user_id, username, user.user_state!);
       res.status(200).json({
         success: true,
         message: "Password reset successfully",

@@ -26,9 +26,9 @@ export const comparePasswords = async (
 };
 
 const JWT_SECRET = process.env.JWT_SECRET || "default-wont-work";
-const JWT_EXPIRY = 30 * 60;
-export const generateAuthToken = (userId: string, username: string) => {
-  return jwt.sign({ userId, username }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+const JWT_EXPIRY = 60000 * 60;
+export const generateAuthToken = (userId: string, username: string, userState: user_state) => {
+  return jwt.sign({ userId, username, userState }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
 };
 
 export const generate24WordHash = () => {
@@ -63,11 +63,11 @@ export const canUpdatePassword = (lastUpdate: Date): boolean => {
 };
 
 export const getUserNextState = (userState: user_state) => {
-  const nextUserState: Record<user_state, user_state | null> = {
+  const nextUserState: Record<user_state, user_state> = {
     INIT: "WORD_SECRET_COPIED",
     WORD_SECRET_COPIED: "WALLET_SELECTED",
     WALLET_SELECTED: "COMPLETED",
-    COMPLETED: null,
+    COMPLETED: "COMPLETED"
   };
   return nextUserState[userState];
 };
