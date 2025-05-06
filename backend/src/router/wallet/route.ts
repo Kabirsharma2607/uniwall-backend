@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { middleware } from "../middleware";
-import { PrismaClient, wallet_type } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { availableWalletTypes, createWallets, getAllBalances } from "./utils";
 import { selectedWalletSchema } from "@kabir.26/uniwall-commons";
 
@@ -13,8 +13,8 @@ router.use(middleware);
 
 router.get("/health", async (req: Request, res: Response) => {
   const response = await getAllBalances(req.userId);
-  res.status(200).json({ message: "Health up", data : response });
-  return; 
+  res.status(200).json({ message: "Health up", data: response });
+  return;
 });
 
 router.post("/select-wallet", async (req: Request, res: Response) => {
@@ -29,11 +29,15 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
       return;
     }
 
+    console.log(req.userId);
+
     const user = await prisma.user_details.findUnique({
       where: {
         user_id: req.userId,
       },
     });
+
+    console.log("User", user);
 
     if (!user) {
       res.status(403).json({
@@ -59,8 +63,8 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
     });
     res.status(200).json({
       success: true,
-      data: response,
       message: "Wallets created successfully",
+      deeplink: "/show-wallet",
     });
     return;
   } catch (e) {
@@ -97,8 +101,8 @@ router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
       },
     });
 
-    const missingWalletTypes = availableWalletTypes.filter(item =>
-      !wallets.some(wallet => wallet.wallet_type === item)
+    const missingWalletTypes = availableWalletTypes.filter(
+      (item) => !wallets.some((wallet) => wallet.wallet_type === item)
     );
 
     res.status(200).json({
@@ -106,13 +110,56 @@ router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
       data: missingWalletTypes,
       message: "Eligible wallets fetched successfully",
     });
-    
+
     return;
   } catch (e) {
     res.status(500).json({
       success: false,
       message: "Internal server error",
     });
+  }
+});
+
+router.get("/get-wallets", async (req: Request, res: Response) => {
+  try {
+    const user = await prisma.user_details.findUnique({
+      where: {
+        user_id: req.userId,
+      },
+    });
+
+    if (!user) {
+      res.status(403).json({
+        success: false,
+        message: "User Not Found",
+      });
+      return;
+    }
+
+    const wallets = await prisma.user_wallet_details.findMany({
+      where: {
+        user_id: user.row_id,
+      },
+      select: {
+        wallet_type: true,
+        wallet_address: true,
+        wallet_private_key: true,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: wallets,
+      message: "Wallets fetched successfully",
+    });
+
+    return;
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+    return;
   }
 });
 
