@@ -19,7 +19,7 @@ model user_details {
   username          String                @unique
   created_at        DateTime              @default(now())
   updated_at        DateTime              @updatedAt
-  user_state        user_state?
+  user_state        user_state            @default(INIT)
   user_auth_details user_auth_details?
   wallets           user_wallet_details[]
 
@@ -40,13 +40,14 @@ model user_auth_details {
 }
 
 model user_wallet_details {
-  row_id         BigInt      @id @default(autoincrement())
-  user_id        BigInt
-  raw_user_id    String      @unique
-  wallet_address String
-  wallet_type    wallet_type
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @updatedAt
+  row_id             BigInt      @id @default(autoincrement())
+  user_id            BigInt
+  raw_user_id        String
+  wallet_address     String
+  wallet_private_key String
+  wallet_type        wallet_type
+  created_at         DateTime    @default(now())
+  updated_at         DateTime    @updatedAt
 
   user_details user_details @relation(fields: [user_id], references: [row_id])
 
@@ -55,7 +56,7 @@ model user_wallet_details {
 }
 
 enum wallet_type {
-  SOLANA
+  SOL
   BTC
   PALO
   ETH
