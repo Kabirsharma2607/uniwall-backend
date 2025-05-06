@@ -43,32 +43,7 @@ router.post("/login", async (req: Request, res: Response) => {
       return;
     }
 
-    if (user?.user_state !== "COMPLETED") {
-      switch (user?.user_state) {
-        case "INIT":
-          res.status(200).json({
-            success: false,
-            message: "User is not active",
-            deeplink: "/recovery",
-          });
-          break;
-        case "WORD_SECRET_COPIED":
-          res.status(200).json({
-            success: false,
-            message: "User has not selected any wallet",
-            deeplink: "/select-wallet",
-          });
-          break;
-        case "WALLET_SELECTED":
-          res.status(200).json({
-            success: false,
-            message: "User has not viewed dashboard",
-            deeplink: "/dashboard",
-          });
-          break;
-      }
-      return;
-    }
+    
     const isPasswordValid = await comparePasswords(
       password,
       user?.user_auth_details?.password!
@@ -78,6 +53,37 @@ router.post("/login", async (req: Request, res: Response) => {
       return;
     }
     const token = generateAuthToken(user.user_id, username, user.user_state);
+
+    if (user?.user_state !== "COMPLETED") {
+      switch (user?.user_state) {
+        case "INIT":
+          res.status(200).json({
+            success: false,
+            message: "User is not active",
+            deeplink: "/recovery",
+            token: token,
+          });
+          break;
+        case "WORD_SECRET_COPIED":
+          res.status(200).json({
+            success: false,
+            message: "User has not selected any wallet",
+            deeplink: "/select-wallet",
+            token: token,
+          });
+          break;
+        case "WALLET_SELECTED":
+          res.status(200).json({
+            success: false,
+            message: "User has not viewed dashboard",
+            deeplink: "/dashboard",
+            token: token,
+          });
+          break;
+      }
+      return;
+    }
+
     res.status(200).json({
       success: true,
       message: "User logged in successfully.",
@@ -94,7 +100,7 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 router.post("/signup", async (req: Request, res: Response) => {
-  console.log(req.body);
+  // console.log(req.body);
   try {
     console.log("Signup request body:", req.body);
 
@@ -167,6 +173,7 @@ router.post("/signup", async (req: Request, res: Response) => {
 router.patch(
   "/update-user-state/:userId",
   async (req: Request, res: Response) => {
+    console.log(req.params);
     try {
       const { success, data, error } = confirmCompletionSchema.safeParse(
         req.params
@@ -180,13 +187,14 @@ router.patch(
       const { userId } = req.params;
       const user = await prisma.user_details.findUnique({
         where: {
-          user_id: userId,
+          username: userId,
         },
       });
+      console.log(user);
       if (user?.user_state) {
         await prisma.user_details.update({
           where: {
-            user_id: userId,
+            username: userId,
           },
           data: {
             user_state: getUserNextState(user.user_state),
@@ -204,10 +212,12 @@ router.patch(
       }
       return;
     } catch (err) {
+      console.log(err);
       res.status(500).json({
         success: false,
         message: "Internal server error",
       });
+      return;
     }
   }
 );
@@ -386,7 +396,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
 router.get("/words-secret/:username", async (req: Request, res: Response) => {
   try {
-    console.log(req);
+    // console.log(req);
     const { username } = req.params;
     const wordsSecret = await prisma.user_details.findUnique({
       where: {

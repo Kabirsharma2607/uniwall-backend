@@ -72,6 +72,7 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
 });
 
 router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
+  console.log("calling get-eligible-wallets");
   try {
     const user = await prisma.user_details.findUnique({
       where: {
