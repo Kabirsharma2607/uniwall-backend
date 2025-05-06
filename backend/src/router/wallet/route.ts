@@ -3,11 +3,10 @@ import { middleware } from "../middleware";
 import { PrismaClient } from "@prisma/client";
 import { availableWalletTypes, createWallets, getAllBalances } from "./utils";
 import { selectedWalletSchema } from "@kabir.26/uniwall-commons";
+import { getUserNextState } from "../auth/utils";
 
 const prisma = new PrismaClient();
 const router = Router();
-
-console.log("Entering Wallets");
 
 router.use(middleware);
 
@@ -29,15 +28,11 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
       return;
     }
 
-    console.log(req.userId);
-
     const user = await prisma.user_details.findUnique({
       where: {
         user_id: req.userId,
       },
     });
-
-    console.log("User", user);
 
     if (!user) {
       res.status(403).json({
@@ -61,6 +56,14 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
         wallet_type: wallet.walletType,
       })),
     });
+    await prisma.user_details.update({
+      where: {
+        user_id: req.userId,
+      },
+      data: {
+        user_state: getUserNextState(user.user_state),
+      },
+    });
     res.status(200).json({
       success: true,
       message: "Wallets created successfully",
@@ -76,7 +79,6 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
 });
 
 router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
-  console.log("calling get-eligible-wallets");
   try {
     const user = await prisma.user_details.findUnique({
       where: {
@@ -151,6 +153,7 @@ router.get("/get-wallets", async (req: Request, res: Response) => {
       success: true,
       data: wallets,
       message: "Wallets fetched successfully",
+      deeplink: "/dashboard",
     });
 
     return;

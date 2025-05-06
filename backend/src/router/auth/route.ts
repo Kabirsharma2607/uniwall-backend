@@ -22,7 +22,6 @@ const router = Router();
 const prisma = new PrismaClient();
 
 router.post("/login", async (req: Request, res: Response) => {
-  console.log("Login request body:", req.body);
 
   try {
     const { success, data } = authSchema.safeParse(req.body);
@@ -100,9 +99,7 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 router.post("/signup", async (req: Request, res: Response) => {
-  // console.log(req.body);
   try {
-    console.log("Signup request body:", req.body);
 
     const { success, data, error } = authSchema.safeParse(req.body);
     if (error || !success) {
@@ -144,7 +141,6 @@ router.post("/signup", async (req: Request, res: Response) => {
       },
     });
     if (newUser) {
-      console.log(newUser.user_state);
       const authToken = generateAuthToken(newUser.user_id, username, newUser.user_state);
       res.status(200).json({
         success: true,
@@ -161,7 +157,6 @@ router.post("/signup", async (req: Request, res: Response) => {
       return;
     }
   } catch (error) {
-    console.log("Error in signup:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -173,7 +168,6 @@ router.post("/signup", async (req: Request, res: Response) => {
 router.patch(
   "/update-user-state/:userId",
   async (req: Request, res: Response) => {
-    console.log(req.params);
     try {
       const { success, data, error } = confirmCompletionSchema.safeParse(
         req.params
@@ -190,7 +184,6 @@ router.patch(
           username: userId,
         },
       });
-      console.log(user);
       if (user?.user_state) {
         await prisma.user_details.update({
           where: {
@@ -212,8 +205,7 @@ router.patch(
       }
       return;
     } catch (err) {
-      console.log(err);
-      res.status(500).json({
+=      res.status(500).json({
         success: false,
         message: "Internal server error",
       });
@@ -396,7 +388,6 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
 router.get("/words-secret/:username", async (req: Request, res: Response) => {
   try {
-    // console.log(req);
     const { username } = req.params;
     const wordsSecret = await prisma.user_details.findUnique({
       where: {
