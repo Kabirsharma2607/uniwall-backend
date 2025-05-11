@@ -22,7 +22,6 @@ const router = Router();
 const prisma = new PrismaClient();
 
 router.post("/login", async (req: Request, res: Response) => {
-  console.log("Login request body:", req.body);
 
   try {
     const { success, data } = authSchema.safeParse(req.body);
@@ -43,6 +42,17 @@ router.post("/login", async (req: Request, res: Response) => {
       return;
     }
 
+    
+    const isPasswordValid = await comparePasswords(
+      password,
+      user?.user_auth_details?.password!
+    );
+    if (!isPasswordValid) {
+      res.status(401).json({ success: false, message: "Invalid credentials" });
+      return;
+    }
+    const token = generateAuthToken(user.user_id, username, user.user_state);
+
     if (user?.user_state !== "COMPLETED") {
       switch (user?.user_state) {
         case "INIT":
@@ -50,6 +60,7 @@ router.post("/login", async (req: Request, res: Response) => {
             success: false,
             message: "User is not active",
             deeplink: "/recovery",
+            token: token,
           });
           break;
         case "WORD_SECRET_COPIED":
@@ -57,6 +68,7 @@ router.post("/login", async (req: Request, res: Response) => {
             success: false,
             message: "User has not selected any wallet",
             deeplink: "/select-wallet",
+            token: token,
           });
           break;
         case "WALLET_SELECTED":
@@ -64,21 +76,13 @@ router.post("/login", async (req: Request, res: Response) => {
             success: false,
             message: "User has not viewed dashboard",
             deeplink: "/dashboard",
+            token: token,
           });
           break;
       }
       return;
     }
 
-    const isPasswordValid = await comparePasswords(
-      password,
-      user.user_auth_details?.password!
-    );
-    if (!isPasswordValid) {
-      res.status(401).json({ success: false, message: "Invalid credentials" });
-      return;
-    }
-    const token = generateAuthToken(user.user_id, username);
     res.status(200).json({
       success: true,
       message: "User logged in successfully.",
@@ -96,7 +100,6 @@ router.post("/login", async (req: Request, res: Response) => {
 
 router.post("/signup", async (req: Request, res: Response) => {
   try {
-    console.log("Signup request body:", req.body);
 
     const { success, data, error } = authSchema.safeParse(req.body);
     if (error || !success) {
@@ -138,7 +141,7 @@ router.post("/signup", async (req: Request, res: Response) => {
       },
     });
     if (newUser) {
-      const authToken = generateAuthToken(newUser.user_id, username);
+      const authToken = generateAuthToken(newUser.user_id, username, newUser.user_state);
       res.status(200).json({
         success: true,
         message: "User signed up successfully",
@@ -154,7 +157,6 @@ router.post("/signup", async (req: Request, res: Response) => {
       return;
     }
   } catch (error) {
-    console.log("Error in signup:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -179,13 +181,13 @@ router.patch(
       const { userId } = req.params;
       const user = await prisma.user_details.findUnique({
         where: {
-          user_id: userId,
+          username: userId,
         },
       });
       if (user?.user_state) {
         await prisma.user_details.update({
           where: {
-            user_id: userId,
+            username: userId,
           },
           data: {
             user_state: getUserNextState(user.user_state),
@@ -203,10 +205,11 @@ router.patch(
       }
       return;
     } catch (err) {
-      res.status(500).json({
+=      res.status(500).json({
         success: false,
         message: "Internal server error",
       });
+      return;
     }
   }
 );
@@ -273,7 +276,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
-      const authToken = generateAuthToken(user.user_id, username);
+      const authToken = generateAuthToken(user.user_id, username, user.user_state);
       res.status(200).json({
         success: true,
         message: "Password reset successfully",
@@ -365,7 +368,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
-      const authToken = generateAuthToken(user.user_id, username);
+      const authToken = generateAuthToken(user.user_id, username, user.user_state!);
       res.status(200).json({
         success: true,
         message: "Password reset successfully",
@@ -385,7 +388,6 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
 router.get("/words-secret/:username", async (req: Request, res: Response) => {
   try {
-    console.log(req);
     const { username } = req.params;
     const wordsSecret = await prisma.user_details.findUnique({
       where: {
