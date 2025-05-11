@@ -22,8 +22,11 @@ const router = Router();
 const prisma = new PrismaClient();
 
 router.post("/login", async (req: Request, res: Response) => {
+<<<<<<< Updated upstream
   console.log("Login request body:", req.body);
 
+=======
+>>>>>>> Stashed changes
   try {
     const { success, data } = authSchema.safeParse(req.body);
     if (!success) {
@@ -43,6 +46,19 @@ router.post("/login", async (req: Request, res: Response) => {
       return;
     }
 
+<<<<<<< Updated upstream
+=======
+    const isPasswordValid = await comparePasswords(
+      password,
+      user?.user_auth_details?.password!
+    );
+    if (!isPasswordValid) {
+      res.status(401).json({ success: false, message: "Invalid credentials" });
+      return;
+    }
+    const token = generateAuthToken(user.user_id, username, user.user_state);
+
+>>>>>>> Stashed changes
     if (user?.user_state !== "COMPLETED") {
       switch (user?.user_state) {
         case "INIT":
@@ -96,8 +112,11 @@ router.post("/login", async (req: Request, res: Response) => {
 
 router.post("/signup", async (req: Request, res: Response) => {
   try {
+<<<<<<< Updated upstream
     console.log("Signup request body:", req.body);
 
+=======
+>>>>>>> Stashed changes
     const { success, data, error } = authSchema.safeParse(req.body);
     if (error || !success) {
       res.status(200).json({
@@ -138,11 +157,18 @@ router.post("/signup", async (req: Request, res: Response) => {
       },
     });
     if (newUser) {
+<<<<<<< Updated upstream
       const authToken = generateAuthToken(newUser.user_id, username);
+=======
+      const authToken = generateAuthToken(
+        newUser.user_id,
+        username,
+        newUser.user_state
+      );
+>>>>>>> Stashed changes
       res.status(200).json({
         success: true,
         message: "User signed up successfully",
-        wordsSecret: secretWord,
         token: authToken,
       });
       return;
@@ -273,7 +299,15 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
+<<<<<<< Updated upstream
       const authToken = generateAuthToken(user.user_id, username);
+=======
+      const authToken = generateAuthToken(
+        user.user_id,
+        username,
+        user.user_state
+      );
+>>>>>>> Stashed changes
       res.status(200).json({
         success: true,
         message: "Password reset successfully",
@@ -365,7 +399,15 @@ router.post("/reset-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
+<<<<<<< Updated upstream
       const authToken = generateAuthToken(user.user_id, username);
+=======
+      const authToken = generateAuthToken(
+        user.user_id,
+        username,
+        user.user_state!
+      );
+>>>>>>> Stashed changes
       res.status(200).json({
         success: true,
         message: "Password reset successfully",
