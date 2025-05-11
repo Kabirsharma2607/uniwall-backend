@@ -10,20 +10,29 @@
     "lint": "eslint ./src --ext .ts"
   },
   "dependencies": {
-    "@kabir.26/uniwall-commons": "^1.0.6",
+    "@kabir.26/uniwall-commons": "^1.0.7",
+    "@polkadot/api": "^15.9.2",
+    "@polkadot/keyring": "^13.4.4",
+    "@polkadot/util-crypto": "^13.4.4",
     "@prisma/client": "^6.6.0",
+    "@solana/web3.js": "^1.98.1",
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
     "@types/jsonwebtoken": "^9.0.9",
+    "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
+    "bitcoinjs-lib": "^6.1.7",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
+    "ecpair": "^3.0.0",
+    "ethers": "^6.13.5",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "nanoid": "^3.3.4",
-    "prisma": "^6.5.0"
+    "prisma": "^6.5.0",
+    "tiny-secp256k1": "^2.2.3"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.0.0",

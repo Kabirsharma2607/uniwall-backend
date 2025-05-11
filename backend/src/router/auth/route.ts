@@ -58,6 +58,7 @@ router.post("/login", async (req: Request, res: Response) => {
             success: false,
             message: "User is not active",
             deeplink: "/recovery",
+            token: token,
           });
           break;
         case "WORD_SECRET_COPIED":
@@ -65,6 +66,7 @@ router.post("/login", async (req: Request, res: Response) => {
             success: false,
             message: "User has not selected any wallet",
             deeplink: "/select-wallet",
+            token: token,
           });
           break;
         case "WALLET_SELECTED":
@@ -72,6 +74,7 @@ router.post("/login", async (req: Request, res: Response) => {
             success: false,
             message: "User has not viewed dashboard",
             deeplink: "/dashboard",
+            token: token,
           });
           break;
       }
@@ -147,7 +150,6 @@ router.post("/signup", async (req: Request, res: Response) => {
       return;
     }
   } catch (error) {
-    console.log("Error in signup:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -172,13 +174,13 @@ router.patch(
       const { userId } = req.params;
       const user = await prisma.user_details.findUnique({
         where: {
-          user_id: userId,
+          username: userId,
         },
       });
       if (user?.user_state) {
         await prisma.user_details.update({
           where: {
-            user_id: userId,
+            username: userId,
           },
           data: {
             user_state: getUserNextState(user.user_state),
@@ -200,6 +202,7 @@ router.patch(
         success: false,
         message: "Internal server error",
       });
+      return;
     }
   }
 );
@@ -386,7 +389,6 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
 router.get("/words-secret/:username", async (req: Request, res: Response) => {
   try {
-    console.log(req);
     const { username } = req.params;
     const wordsSecret = await prisma.user_details.findUnique({
       where: {
