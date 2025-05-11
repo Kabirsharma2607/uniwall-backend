@@ -213,7 +213,7 @@ router.patch(
 
 router.post("/forgot-password", async (req: Request, res: Response) => {
   try {
-    await prisma.$transaction(async (tx: any) => {
+    await prisma.$transaction(async (tx) => {
       const { success, data, error } = forgotPasswordSchema.safeParse(req.body);
       if (!success || error) {
         res.status(400).json({
