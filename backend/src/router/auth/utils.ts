@@ -63,11 +63,11 @@ export const canUpdatePassword = (lastUpdate: Date): boolean => {
 };
 
 export const getUserNextState = (userState: user_state) => {
-  const nextUserState: Record<user_state, user_state | null> = {
+  const nextUserState: Record<user_state, user_state> = {
     INIT: "WORD_SECRET_COPIED",
     WORD_SECRET_COPIED: "WALLET_SELECTED",
     WALLET_SELECTED: "COMPLETED",
-    COMPLETED: null,
+    COMPLETED: "COMPLETED",
   };
   return nextUserState[userState];
 };

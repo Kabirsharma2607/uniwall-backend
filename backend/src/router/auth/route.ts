@@ -138,11 +138,14 @@ router.post("/signup", async (req: Request, res: Response) => {
       },
     });
     if (newUser) {
-      const authToken = generateAuthToken(newUser.user_id, username);
+      const authToken = generateAuthToken(
+        newUser.user_id,
+        username,
+        newUser.user_state
+      );
       res.status(200).json({
         success: true,
         message: "User signed up successfully",
-        wordsSecret: secretWord,
         token: authToken,
       });
       return;
@@ -273,7 +276,15 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
+<<<<<<< Updated upstream
       const authToken = generateAuthToken(user.user_id, username);
+=======
+      const authToken = generateAuthToken(
+        user.user_id,
+        username,
+        user.user_state
+      );
+>>>>>>> Stashed changes
       res.status(200).json({
         success: true,
         message: "Password reset successfully",
@@ -365,7 +376,15 @@ router.post("/reset-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
+<<<<<<< Updated upstream
       const authToken = generateAuthToken(user.user_id, username);
+=======
+      const authToken = generateAuthToken(
+        user.user_id,
+        username,
+        user.user_state!
+      );
+>>>>>>> Stashed changes
       res.status(200).json({
         success: true,
         message: "Password reset successfully",
