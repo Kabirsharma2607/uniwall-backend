@@ -6,7 +6,6 @@ import { user_state } from "@prisma/client";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "";
-
 declare global {
   namespace Express {
     interface Request {

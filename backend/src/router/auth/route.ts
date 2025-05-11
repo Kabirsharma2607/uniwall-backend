@@ -40,10 +40,16 @@ router.post("/login", async (req: Request, res: Response) => {
       res.status(404).json({ success: false, message: "User not found" });
       return;
     }
-
+    if (!user?.user_auth_details?.password) {
+      res.status(403).send({
+        success: false,
+        message: "Password cannot be null",
+      });
+      return;
+    }
     const isPasswordValid = await comparePasswords(
       password,
-      user?.user_auth_details?.password!
+      user?.user_auth_details?.password
     );
     if (!isPasswordValid) {
       res.status(401).json({ success: false, message: "Invalid credentials" });
@@ -162,9 +168,7 @@ router.patch(
   "/update-user-state/:userId",
   async (req: Request, res: Response) => {
     try {
-      const { success, data, error } = confirmCompletionSchema.safeParse(
-        req.params
-      );
+      const { success, error } = confirmCompletionSchema.safeParse(req.params);
       if (!success || error) {
         res.status(404).json({
           success: false,
@@ -209,7 +213,7 @@ router.patch(
 
 router.post("/forgot-password", async (req: Request, res: Response) => {
   try {
-    await prisma.$transaction(async (tx: any) => {
+    await prisma.$transaction(async (tx) => {
       const { success, data, error } = forgotPasswordSchema.safeParse(req.body);
       if (!success || error) {
         res.status(400).json({
@@ -234,8 +238,15 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
         });
         return;
       }
+      if (!user?.user_auth_details?.created_at) {
+        res.status(403).send({
+          success: false,
+          message: "Password cannot be null",
+        });
+        return;
+      }
       const updatePasswordAllowed = canUpdatePassword(
-        user?.user_auth_details?.created_at!
+        user?.user_auth_details?.created_at
       );
       if (!updatePasswordAllowed) {
         res.status(401).json({
@@ -244,9 +255,16 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
         });
         return;
       }
+      if (!user?.user_auth_details?.words_secret) {
+        res.status(403).send({
+          success: false,
+          message: "Words secret cannot be null",
+        });
+        return;
+      }
       const isSecretValid = compareSecrets(
         secretWord,
-        user.user_auth_details?.words_secret!
+        user.user_auth_details?.words_secret
       );
       if (!isSecretValid) {
         res.status(404).json({
@@ -293,7 +311,7 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
 
 router.post("/reset-password", async (req: Request, res: Response) => {
   try {
-    await prisma.$transaction(async (tx: any) => {
+    await prisma.$transaction(async (tx) => {
       const { success, data, error } = resetPasswordSchema.safeParse(req.body);
       if (!success || error) {
         res.status(400).json({
@@ -319,8 +337,15 @@ router.post("/reset-password", async (req: Request, res: Response) => {
         });
         return;
       }
+      if (!user?.user_auth_details?.created_at) {
+        res.status(403).send({
+          success: false,
+          message: "Password cannot be null",
+        });
+        return;
+      }
       const updatePasswordAllowed = canUpdatePassword(
-        user?.user_auth_details?.created_at!
+        user.user_auth_details.created_at
       );
       if (!updatePasswordAllowed) {
         res.status(401).json({
@@ -329,9 +354,16 @@ router.post("/reset-password", async (req: Request, res: Response) => {
         });
         return;
       }
+      if (!user?.user_auth_details?.password) {
+        res.status(403).send({
+          success: false,
+          message: "Password cannot be null",
+        });
+        return;
+      }
       const isPasswordValid = await comparePasswords(
         oldPassword,
-        user.user_auth_details?.password!
+        user.user_auth_details.password
       );
       if (!isPasswordValid) {
         res.status(401).json({
@@ -340,9 +372,16 @@ router.post("/reset-password", async (req: Request, res: Response) => {
         });
         return;
       }
+      if (!user?.user_auth_details?.words_secret) {
+        res.status(403).send({
+          success: false,
+          message: "Words secret cannot be null",
+        });
+        return;
+      }
       const isSecretValid = compareSecrets(
         secretWord,
-        user.user_auth_details?.words_secret!
+        user.user_auth_details?.words_secret
       );
       if (!isSecretValid) {
         res.status(404).json({
@@ -368,7 +407,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
       const authToken = generateAuthToken(
         user.user_id,
         username,
-        user.user_state!
+        user.user_state
       );
       res.status(200).json({
         success: true,
