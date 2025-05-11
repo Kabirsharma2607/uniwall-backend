@@ -22,7 +22,6 @@ const router = Router();
 const prisma = new PrismaClient();
 
 router.post("/login", async (req: Request, res: Response) => {
-
   try {
     const { success, data } = authSchema.safeParse(req.body);
     if (!success) {
@@ -42,7 +41,6 @@ router.post("/login", async (req: Request, res: Response) => {
       return;
     }
 
-    
     const isPasswordValid = await comparePasswords(
       password,
       user?.user_auth_details?.password!
@@ -82,13 +80,6 @@ router.post("/login", async (req: Request, res: Response) => {
       }
       return;
     }
-
-    res.status(200).json({
-      success: true,
-      message: "User logged in successfully.",
-      token: token,
-    });
-    return;
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -100,7 +91,6 @@ router.post("/login", async (req: Request, res: Response) => {
 
 router.post("/signup", async (req: Request, res: Response) => {
   try {
-
     const { success, data, error } = authSchema.safeParse(req.body);
     if (error || !success) {
       res.status(200).json({
@@ -141,11 +131,14 @@ router.post("/signup", async (req: Request, res: Response) => {
       },
     });
     if (newUser) {
-      const authToken = generateAuthToken(newUser.user_id, username, newUser.user_state);
+      const authToken = generateAuthToken(
+        newUser.user_id,
+        username,
+        newUser.user_state
+      );
       res.status(200).json({
         success: true,
         message: "User signed up successfully",
-        wordsSecret: secretWord,
         token: authToken,
       });
       return;
@@ -205,7 +198,7 @@ router.patch(
       }
       return;
     } catch (err) {
-=      res.status(500).json({
+      res.status(500).json({
         success: false,
         message: "Internal server error",
       });
@@ -276,7 +269,11 @@ router.post("/forgot-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
-      const authToken = generateAuthToken(user.user_id, username, user.user_state);
+      const authToken = generateAuthToken(
+        user.user_id,
+        username,
+        user.user_state
+      );
       res.status(200).json({
         success: true,
         message: "Password reset successfully",
@@ -368,7 +365,11 @@ router.post("/reset-password", async (req: Request, res: Response) => {
           words_secret: newSecretWord.join("-"),
         },
       });
-      const authToken = generateAuthToken(user.user_id, username, user.user_state!);
+      const authToken = generateAuthToken(
+        user.user_id,
+        username,
+        user.user_state!
+      );
       res.status(200).json({
         success: true,
         message: "Password reset successfully",

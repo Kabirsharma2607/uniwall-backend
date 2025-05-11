@@ -1,18 +1,18 @@
 import { Request, Response, Router } from "express";
 import { middleware } from "../middleware";
 import { PrismaClient } from "@prisma/client";
-import { availableWalletTypes, createWallets, getAllBalances } from "./utils";
+import { createWallets, getNotSelectedWalletsList } from "./utils";
 import { selectedWalletSchema } from "@kabir.26/uniwall-commons";
 import { getUserNextState } from "../auth/utils";
 
-const prisma = new PrismaClient();
 const router = Router();
 
 router.use(middleware);
 
-router.get("/health", async (req: Request, res: Response) => {
-  const response = await getAllBalances(req.userId);
-  res.status(200).json({ message: "Health up", data: response });
+const prisma = new PrismaClient();
+
+router.get("/health", async (_: Request, res: Response) => {
+  res.status(200).json({ message: "Health up" });
   return;
 });
 
@@ -71,6 +71,7 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
     });
     return;
   } catch (e) {
+    console.log(e);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -103,13 +104,13 @@ router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
       },
     });
 
-    const missingWalletTypes = availableWalletTypes.filter(
-      (item) => !wallets.some((wallet) => wallet.wallet_type === item)
+    const notSelectedWalletsList = getNotSelectedWalletsList(
+      wallets.map((w) => w.wallet_type)
     );
 
     res.status(200).json({
       success: true,
-      data: missingWalletTypes,
+      data: notSelectedWalletsList,
       message: "Eligible wallets fetched successfully",
     });
 

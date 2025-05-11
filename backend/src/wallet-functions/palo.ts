@@ -4,18 +4,17 @@ import { Keyring } from "@polkadot/keyring";
 import { GeneratedWalletType } from "../types";
 
 export const createPolkadotWallet = async (): Promise<GeneratedWalletType> => {
-    await cryptoWaitReady();
-    const mnemonic = mnemonicGenerate();
-    const keyring = new Keyring({ type: 'sr25519' });
-    const pair = keyring.addFromUri(mnemonic);
+  await cryptoWaitReady();
+  const mnemonic = mnemonicGenerate();
+  const keyring = new Keyring({ type: "sr25519" });
+  const pair = keyring.addFromUri(mnemonic);
 
-    const response: GeneratedWalletType = {
-        publicKey: pair.address,
-        privateKey: mnemonic // Store mnemonic to recover key
-    };
-    return response;
+  const response: GeneratedWalletType = {
+    publicKey: pair.address,
+    privateKey: mnemonic, // Store mnemonic to recover key
+  };
+  return response;
 };
-
 
 export const getPolkadotBalance = async (address: string): Promise<string> => {
   try {
@@ -23,7 +22,9 @@ export const getPolkadotBalance = async (address: string): Promise<string> => {
     const api = await ApiPromise.create({ provider });
 
     const account = await api.query.system.account(address);
-    const { data: balance } = account.toHuman() as unknown as { data: { free: string } };
+    const { data: balance } = account.toHuman() as unknown as {
+      data: { free: string };
+    };
 
     return balance.free;
   } catch (error) {
