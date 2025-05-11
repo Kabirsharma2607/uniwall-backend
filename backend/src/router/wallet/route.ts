@@ -16,11 +16,6 @@ router.use(middleware);
 
 const prisma = new PrismaClient();
 
-router.get("/health", async (req: Request, res: Response) => {
-  res.status(200).send("Ho gaya yaar");
-  return;
-});
-
 router.get("/health", async (_: Request, res: Response) => {
   res.status(200).json({ message: "Health up" });
   return;
