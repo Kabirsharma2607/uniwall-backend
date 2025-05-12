@@ -39,3 +39,4 @@ export const getBitcoinBalance = async (address: string): Promise<string> => {
   const balance = (funded - spent) / 1e8;
   return balance.toFixed(8);
 };
+

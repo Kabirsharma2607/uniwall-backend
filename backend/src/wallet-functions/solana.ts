@@ -62,11 +62,9 @@ export const sendSolana = async (
       })
     );
 
-    const signature = await sendAndConfirmTransaction(
-      connection,
-      transaction,
-      [senderKeypair]
-    );
+    const signature = await sendAndConfirmTransaction(connection, transaction, [
+      senderKeypair,
+    ]);
     console.log("Transaction Succesful");
     return signature;
   } catch (error) {
