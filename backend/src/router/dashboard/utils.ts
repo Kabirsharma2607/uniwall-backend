@@ -1,4 +1,3 @@
-import { wallet_type } from "@prisma/client";
 import { ActionItemSchema, WalletDetailsSchema } from "../../types";
 import { getNotSelectedWalletsList, WalletBalanceType } from "../wallet/utils";
 

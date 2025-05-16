@@ -7,7 +7,10 @@
     "build": "tsc -b && node dist/index.js",
     "start": "node dist/index.js",
     "dev": "tsc -b",
-    "lint": "eslint ./src --ext .ts"
+    "lint": "eslint ./src --ext .ts",
+    "basic-install": "yarn && yarn prisma migrate dev && yarn prisma generate && yarn build",
+    "basic": "yarn prisma migrate dev && yarn prisma generate && yarn build",
+    "start-postgres": "docker run uniwall-backend && docker exec -it /bin/bash"
   },
   "dependencies": {
     "@kabir.26/uniwall-commons": "^1.0.7",
