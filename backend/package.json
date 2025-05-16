@@ -10,7 +10,7 @@
     "lint": "eslint ./src --ext .ts",
     "basic-install": "yarn && yarn prisma migrate dev && yarn prisma generate && yarn build",
     "basic": "yarn prisma migrate dev && yarn prisma generate && yarn build",
-    "start-postgres": "docker run uniwall-backend && docker exec -it /bin/bash"
+    "start-postgres": "docker start uniwall-backend && docker exec -it uniwall-backend /bin/bash"
   },
   "dependencies": {
     "@kabir.26/uniwall-commons": "^1.0.7",
