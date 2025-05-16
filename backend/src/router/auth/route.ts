@@ -57,35 +57,40 @@ router.post("/login", async (req: Request, res: Response) => {
     }
     const token = generateAuthToken(user.user_id, username, user.user_state);
 
-    if (user?.user_state !== "COMPLETED") {
-      switch (user?.user_state) {
-        case "INIT":
-          res.status(200).json({
-            success: false,
-            message: "User is not active",
-            deeplink: "/recovery",
-            token: token,
-          });
-          break;
-        case "WORD_SECRET_COPIED":
-          res.status(200).json({
-            success: false,
-            message: "User has not selected any wallet",
-            deeplink: "/select-wallet",
-            token: token,
-          });
-          break;
-        case "WALLET_SELECTED":
-          res.status(200).json({
-            success: false,
-            message: "User has not viewed dashboard",
-            deeplink: "/dashboard",
-            token: token,
-          });
-          break;
-      }
-      return;
+    switch (user?.user_state) {
+      case "INIT":
+        res.status(200).json({
+          success: false,
+          message: "User is not active",
+          deeplink: "/recovery",
+          token: token,
+        });
+        break;
+      case "WORD_SECRET_COPIED":
+        res.status(200).json({
+          success: false,
+          message: "User has not selected any wallet",
+          deeplink: "/select-wallet",
+          token: token,
+        });
+        break;
+      case "WALLET_SELECTED":
+        res.status(200).json({
+          success: false,
+          message: "User has not viewed dashboard",
+          deeplink: "/dashboard",
+          token: token,
+        });
+        break;
+      default:
+        res.status(200).json({
+          success: true,
+          deeplink: "/dashboard",
+          token: token,
+        });
+        break;
     }
+    return;
   } catch (error) {
     res.status(500).json({
       success: false,
