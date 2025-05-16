@@ -28,7 +28,15 @@ export const getPolkadotBalance = async (address: string): Promise<string> => {
 
     return balance.free;
   } catch (error) {
-    console.error("Error fetching Polkadot balance:", error);
+    console.log("Error fetching Polkadot balance:", error);
     throw error;
   }
+};
+
+export const sendPalo = async (
+  senderPrivateKey: string,
+  receiverPublicKey: string,
+  amountInPALO : number
+) : Promise<string> => {
+  return "Dummy Transaction Hash";
 };

@@ -20,3 +20,11 @@ export const getEthereumBalance = async (address: string): Promise<string> => {
   const balance = await provider.getBalance(address);
   return ethers.formatEther(balance); // returns balance in ETH
 };
+
+export const sendEther = async (
+  senderPrivateKey: string,
+  receiverPublicKey: string,
+  amountInETH : number
+) : Promise<string> => {
+  return "Dummy Transaction Hash";
+};

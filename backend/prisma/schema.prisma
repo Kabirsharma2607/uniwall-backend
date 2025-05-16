@@ -55,6 +55,16 @@ model user_wallet_details {
   @@index([user_id])
 }
 
+model admin_wallet_details {
+  id            String      @id @default(uuid())
+  wallet_type    wallet_type
+  wallet_address String
+  private_key    String      // 🛑 Store securely (see notes below)
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+}
+
+
 enum wallet_type {
   SOL
   BTC
