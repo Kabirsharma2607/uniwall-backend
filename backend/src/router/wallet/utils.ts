@@ -50,7 +50,7 @@ export const getAllBalances = async (
     wallet_address: string;
     wallet_type: wallet_type;
   }[]
-) => {
+): Promise<WalletBalanceType[]> => {
   const balances: WalletBalanceType[] = [];
 
   for (const wallet of wallets) {
