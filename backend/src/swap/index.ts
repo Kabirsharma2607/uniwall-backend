@@ -5,12 +5,14 @@ import { getAdminWithMinBalance } from './adminWallet';
 
 export async function swapToken({
   userPrivateKey,
+  userWalletAddress,
   userTargetWallet,
   from,
   to,
   amount,
 }: {
   userPrivateKey: string; // stringified private key of user
+  userWalletAddress: string;
   userTargetWallet: string | null;
   from: wallet_type;
   to: wallet_type;
@@ -46,7 +48,7 @@ export async function swapToken({
     console.log('Admin to user failed, refunding...');
 
     // Simulate refund (admin sends back the original amount to user)
-    await sendFromAdmin(admin.private_key, userPrivateKey, amount);
+    await sendFromAdmin(admin.private_key, userWalletAddress, amount);
     console.log("Refund done");
     return;
   }
