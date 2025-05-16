@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { middleware } from "../middleware";
-import { PrismaClient, wallet_type } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { createWallets, getNotSelectedWalletsList } from "./utils";
 import { selectedWalletSchema } from "@kabir.26/uniwall-commons";
 import { getUserNextState } from "../auth/utils";
