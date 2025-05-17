@@ -13,7 +13,7 @@
     "start-postgres": "docker run uniwall-backend && docker exec -it /bin/bash"
   },
   "dependencies": {
-    "@kabir.26/uniwall-commons": "^1.0.7",
+    "@kabir.26/uniwall-commons": "^1.0.9",
     "@polkadot/api": "^15.9.2",
     "@polkadot/keyring": "^13.4.4",
     "@polkadot/util-crypto": "^13.4.4",
@@ -28,6 +28,7 @@
     "bitcoinjs-lib": "^6.1.7",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
+    "decimal.js": "^10.5.0",
     "dotenv": "^16.4.7",
     "ecpair": "^3.0.0",
     "ethers": "^6.13.5",

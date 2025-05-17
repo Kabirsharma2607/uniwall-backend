@@ -1,8 +1,8 @@
-import { wallet_type } from "@prisma/client";
 import { getSolanaBalance, sendSolana } from "../wallet-functions/solana";
 import { getEthereumBalance, sendEther } from "../wallet-functions/ethers";
 import { getPolkadotBalance, sendPalo } from "../wallet-functions/palo";
 import { getBitcoinBalance, sendBitcoin } from "../wallet-functions/bitcoin";
+import { WalletType } from "@kabir.26/uniwall-commons";
 
 /**
  * Function type to get balance from a blockchain address.
@@ -16,13 +16,16 @@ type BalanceFetcher = (address: string) => Promise<string>;
 type SendFunction = (
   from: string,
   to: string,
-  amount: number
-) => Promise<string>;
+  amount: string
+) => Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}>;
 
 /**
  * Wallet-specific balance fetchers.
  */
-export const walletBalanceMap: Record<wallet_type, BalanceFetcher> = {
+export const walletBalanceMap: Record<WalletType, BalanceFetcher> = {
   SOL: getSolanaBalance,
   ETH: getEthereumBalance,
   PALO: getPolkadotBalance,
@@ -32,7 +35,7 @@ export const walletBalanceMap: Record<wallet_type, BalanceFetcher> = {
 /**
  * Wallet-specific send functions.
  */
-export const walletSendMap: Record<wallet_type, SendFunction> = {
+export const walletSendMap: Record<WalletType, SendFunction> = {
   SOL: sendSolana,
   ETH: sendEther,
   PALO: sendPalo,

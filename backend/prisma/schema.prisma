@@ -53,6 +53,7 @@ model user_wallet_details {
 
   @@index([row_id])
   @@index([user_id])
+  @@unique([user_id, wallet_type]) 
 }
 
 model admin_wallet_details {

@@ -38,7 +38,11 @@ export async function swapToken({
   const sendFromAdmin = walletSendMap[to];
 
   // Step 1: User sends `amount` of `from` token to admin
-  const sent = await sendFromUser(userPrivateKey, admin.wallet_address, amount);
+  const sent = await sendFromUser(
+    userPrivateKey,
+    admin.wallet_address,
+    amount.toString()
+  );
   if (!sent) {
     console.log("Transfer from user to admin failed");
     return;
@@ -48,13 +52,17 @@ export async function swapToken({
   const sentBack = await sendFromAdmin(
     admin.private_key,
     userTargetWallet,
-    convertedAmount
+    convertedAmount.toString()
   );
   if (!sentBack) {
     console.log("Admin to user failed, refunding...");
 
     // Simulate refund (admin sends back the original amount to user)
-    await sendFromAdmin(admin.private_key, userWalletAddress, amount);
+    await sendFromAdmin(
+      admin.private_key,
+      userWalletAddress,
+      amount.toString()
+    );
     console.log("Refund done");
     return;
   }

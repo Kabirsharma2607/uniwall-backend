@@ -4,8 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
-const provider = new AlchemyProvider('mainnet', ALCHEMY_API_KEY);
-
+const provider = new AlchemyProvider("mainnet", ALCHEMY_API_KEY);
 
 export const createEthereumWallet = (): GeneratedWalletType => {
   const wallet = ethers.Wallet.createRandom();
@@ -24,7 +23,10 @@ export const getEthereumBalance = async (address: string): Promise<string> => {
 export const sendEther = async (
   senderPrivateKey: string,
   receiverPublicKey: string,
-  amountInETH : number
-) : Promise<string> => {
-  return "Dummy Transaction Hash";
+  amountInETH: string
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
+  return { signature: "Dummy Transaction Hash", state: "SUCCESS" };
 };

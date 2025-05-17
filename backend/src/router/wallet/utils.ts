@@ -1,8 +1,11 @@
 import { GeneratedWalletType } from "../../types";
-import { createSolanaWallet } from "../../wallet-functions/solana";
-import { createEthereumWallet } from "../../wallet-functions/ethers";
-import { createPolkadotWallet } from "../../wallet-functions/palo";
-import { createBitcoinWallet } from "../../wallet-functions/bitcoin";
+import { createSolanaWallet, sendSolana } from "../../wallet-functions/solana";
+import { createEthereumWallet, sendEther } from "../../wallet-functions/ethers";
+import { createPolkadotWallet, sendPalo } from "../../wallet-functions/palo";
+import {
+  createBitcoinWallet,
+  sendBitcoin,
+} from "../../wallet-functions/bitcoin";
 import { WalletType } from "@kabir.26/uniwall-commons";
 import { wallet_type } from "@prisma/client";
 import { getSolanaBalance } from "../../wallet-functions/solana";
@@ -94,4 +97,59 @@ export const getNotSelectedWalletsList = (wallets: wallet_type[]) => {
   return availableWalletTypes.filter(
     (item) => !wallets.some((wallet) => wallet === item)
   );
+};
+
+export const getSelectedWalletBalance = async (
+  walletAddress: string,
+  wallet: WalletType
+): Promise<WalletBalanceType> => {
+  switch (wallet) {
+    case "BTC":
+      return {
+        balance: await getBitcoinBalance(walletAddress),
+        walletType: wallet,
+      };
+    case "ETH":
+      return {
+        balance: await getEthereumBalance(walletAddress),
+        walletType: wallet,
+      };
+    case "PALO":
+      return {
+        balance: await getPolkadotBalance(walletAddress),
+        walletType: wallet,
+      };
+    case "SOL":
+      return {
+        balance: await getSolanaBalance(walletAddress),
+        walletType: wallet,
+      };
+  }
+};
+
+export const sendCoinFromOneWalletToAnother = async (
+  senderPrivateKey: string,
+  walletType: wallet_type,
+  receiverPublicAddress: string,
+  amount: string
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
+  switch (walletType) {
+    case "BTC":
+      return sendBitcoin(senderPrivateKey, receiverPublicAddress, amount);
+    case "ETH":
+      return sendEther(senderPrivateKey, receiverPublicAddress, amount);
+    case "PALO":
+      return sendPalo(senderPrivateKey, receiverPublicAddress, amount);
+    case "SOL":
+      return sendSolana(senderPrivateKey, receiverPublicAddress, amount);
+  }
+};
+
+export const getTransactionStatus = (state: "FAILURE" | "SUCCESS"): string => {
+  return state === "FAILURE"
+    ? "Transaction failed. Please try again after some time"
+    : "Transaction Successful";
 };

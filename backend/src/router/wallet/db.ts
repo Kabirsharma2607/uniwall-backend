@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, wallet_type } from "@prisma/client";
 import { User, Wallet } from "../../types";
 
 const prisma = new PrismaClient();
@@ -40,4 +40,36 @@ export const getUserWallets = async (rowId: bigint): Promise<Wallet[]> => {
     walletPublicAddress: wallet.wallet_address,
     walletPrivateKey: wallet.wallet_private_key,
   }));
+};
+
+export const getWalletAddress = async (
+  userId: bigint,
+  walletType: wallet_type
+  // addressType?: "PRIVATE" | "PUBLIC"
+): Promise<{
+  privateKey: string;
+  publicKey: string;
+}> => {
+  try {
+    const walletAddress = await prisma.user_wallet_details.findUnique({
+      where: {
+        user_id_wallet_type: {
+          user_id: userId,
+          wallet_type: walletType,
+        },
+      },
+    });
+
+    if (!walletAddress) {
+      throw new Error("Wallet not found");
+    }
+
+    return {
+      privateKey: walletAddress.wallet_private_key,
+      publicKey: walletAddress.wallet_address,
+    };
+  } catch (error) {
+    console.error("Error fetching wallet address:", error);
+    throw new Error("Failed to retrieve wallet address");
+  }
 };

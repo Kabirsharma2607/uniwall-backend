@@ -41,8 +41,11 @@ export const getSolanaBalance = async (
 export const sendSolana = async (
   senderPrivateKey: string, // stringified array like "[1,2,3,...]"
   receiverPublicKey: string,
-  amountInSol: number
-): Promise<string> => {
+  amountInSol: string
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
   const connection = new Connection(
     "https://api.devnet.solana.com",
     "confirmed"
@@ -58,7 +61,7 @@ export const sendSolana = async (
       SystemProgram.transfer({
         fromPubkey: senderKeypair.publicKey,
         toPubkey: toPubKey,
-        lamports: amountInSol * LAMPORTS_PER_SOL,
+        lamports: Number(amountInSol) * LAMPORTS_PER_SOL,
       })
     );
 
@@ -66,9 +69,14 @@ export const sendSolana = async (
       senderKeypair,
     ]);
     console.log("Transaction Succesful");
-    return signature;
+    return {
+      signature,
+      state: "SUCCESS",
+    };
   } catch (error) {
     console.log("Error sending SOL:", error);
-    throw error;
+    return {
+      state: "FAILURE",
+    };
   }
 };

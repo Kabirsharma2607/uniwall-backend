@@ -5,10 +5,17 @@ import {
   createWallets,
   getAllBalances,
   getNotSelectedWalletsList,
+  getSelectedWalletBalance,
+  getTransactionStatus,
+  sendCoinFromOneWalletToAnother,
 } from "./utils";
-import { selectedWalletSchema } from "@kabir.26/uniwall-commons";
+import {
+  selectedWalletSchema,
+  sendCoinSchema,
+} from "@kabir.26/uniwall-commons";
 import { getUserNextState } from "../auth/utils";
-import { getUser, getUserWallets } from "./db";
+import Decimal from "decimal.js";
+import { getUser, getUserWallets, getWalletAddress } from "./db";
 import { getWalletDetails } from "../dashboard/utils";
 
 const router = Router();
@@ -182,7 +189,52 @@ router.get("/get-wallets-with-balance", async (req: Request, res: Response) => {
 
 router.post("/send-coin", async (req: Request, res: Response) => {
   try {
+    console.log("called");
+
+    const { success, error, data } = sendCoinSchema.safeParse(req.body);
+    if (!success || error) {
+      res.status(400).send({
+        success: false,
+        message: "Invalid body schema",
+      });
+      return;
+    }
+    console.log("called");
+    const { amount, receiverPublicAddress, walletType } = data;
     const user = await getUser(req.userId);
+    console.log("user");
+    const userWalletAddress = await getWalletAddress(
+      user.rowId,
+      walletType
+      // "PRIVATE"
+    );
+    console.log("user wallet", userWalletAddress);
+    const selectedWalletBalance = await getSelectedWalletBalance(
+      userWalletAddress.publicKey,
+      walletType
+    );
+    console.log("user balance", selectedWalletBalance);
+    if (new Decimal(selectedWalletBalance.balance).lt(new Decimal(amount))) {
+      res.status(200).json({
+        success: false,
+        message: "Not sufficient funds",
+      });
+      return;
+    }
+    console.log("Sufficient balance");
+
+    const transactionStatus = await sendCoinFromOneWalletToAnother(
+      userWalletAddress.privateKey,
+      walletType,
+      receiverPublicAddress,
+      amount
+    );
+    console.log("trans status", transactionStatus);
+    res.status(200).send({
+      success: true,
+      message: getTransactionStatus(transactionStatus.state),
+      signature: transactionStatus?.signature,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
