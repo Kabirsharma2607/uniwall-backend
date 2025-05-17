@@ -433,6 +433,7 @@ router.post("/reset-password", async (req: Request, res: Response) => {
 
 router.get("/words-secret/:username", async (req: Request, res: Response) => {
   try {
+    console.log("username, ", req.params);
     const { username } = req.params;
     const wordsSecret = await prisma.user_details.findUnique({
       where: {
@@ -446,11 +447,14 @@ router.get("/words-secret/:username", async (req: Request, res: Response) => {
         },
       },
     });
-    res.status(200).json({
+    console.log("secret, ", wordsSecret);
+    const response = {
       success: true,
       data: wordsSecret?.user_auth_details?.words_secret.split("-"),
       message: "Your words secret",
-    });
+    };
+    console.log("response, ", response);
+    res.status(200).json(response);
     return;
   } catch (e) {
     res.status(500).send("Internal server error");

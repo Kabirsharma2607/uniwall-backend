@@ -18,6 +18,7 @@ export const createPolkadotWallet = async (): Promise<GeneratedWalletType> => {
 
 export const getPolkadotBalance = async (address: string): Promise<string> => {
   try {
+    console.log("polka balance");
     const provider = new WsProvider("wss://rpc.polkadot.io");
     const api = await ApiPromise.create({ provider });
 
@@ -28,7 +29,18 @@ export const getPolkadotBalance = async (address: string): Promise<string> => {
 
     return balance.free;
   } catch (error) {
-    console.error("Error fetching Polkadot balance:", error);
+    console.log("Error fetching Polkadot balance:", error);
     throw error;
   }
+};
+
+export const sendPalo = async (
+  senderPrivateKey: string,
+  receiverPublicKey: string,
+  amountInPALO: string
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
+  return { signature: "Dummy Transaction Hash", state: "SUCCESS" };
 };
