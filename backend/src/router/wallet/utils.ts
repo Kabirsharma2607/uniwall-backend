@@ -1,19 +1,28 @@
 import { GeneratedWalletType } from "../../types";
-import { createSolanaWallet, sendSolana } from "../../wallet-functions/solana";
-import { createEthereumWallet, sendEther } from "../../wallet-functions/ethers";
-import { createPolkadotWallet, sendPalo } from "../../wallet-functions/palo";
+import {
+  createSolanaWallet,
+  sendSolana,
+  getSolanaBalance,
+} from "../../wallet-functions/solana";
+import {
+  createEthereumWallet,
+  sendEther,
+  getEthereumBalance,
+} from "../../wallet-functions/ethers";
+import {
+  createPolkadotWallet,
+  sendPalo,
+  getPolkadotBalance,
+} from "../../wallet-functions/palo";
 import {
   createBitcoinWallet,
   sendBitcoin,
+  getBitcoinBalance,
 } from "../../wallet-functions/bitcoin";
 import { WalletType } from "@kabir.26/uniwall-commons";
 import { wallet_type } from "@prisma/client";
-import { getSolanaBalance } from "../../wallet-functions/solana";
-import { getPolkadotBalance } from "../../wallet-functions/palo";
-import { getBitcoinBalance } from "../../wallet-functions/bitcoin";
-import { getEthereumBalance } from "../../wallet-functions/ethers";
 
-type GeneratedWalletKeyPairsType = {
+export type GeneratedWalletKeyPairsType = {
   walletType: WalletType;
   keyPair: GeneratedWalletType;
 };

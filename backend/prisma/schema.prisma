@@ -49,11 +49,12 @@ model user_wallet_details {
   created_at         DateTime    @default(now())
   updated_at         DateTime    @updatedAt
 
-  user_details user_details @relation(fields: [user_id], references: [row_id])
+  user_details          user_details           @relation(fields: [user_id], references: [row_id])
+  user_wallets_qr_codes user_wallets_qr_codes?
 
+  @@unique([user_id, wallet_type])
   @@index([row_id])
   @@index([user_id])
-  @@unique([user_id, wallet_type]) 
 }
 
 model admin_wallet_details {
@@ -63,6 +64,19 @@ model admin_wallet_details {
   private_key    String
   created_at     DateTime    @default(now())
   updated_at     DateTime    @updatedAt
+}
+
+model user_wallets_qr_codes {
+  row_id      BigInt   @id @default(autoincrement())
+  wallet_id   BigInt
+  qr_code_url String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user_wallet user_wallet_details @relation(fields: [wallet_id], references: [row_id])
+
+  @@unique([wallet_id])
+  @@index([wallet_id])
 }
 
 enum wallet_type {

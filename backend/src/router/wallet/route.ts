@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { middleware } from "../middleware";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, wallet_type } from "@prisma/client";
 import {
   createWallets,
   getAllBalances,
@@ -15,8 +15,9 @@ import {
 } from "@kabir.26/uniwall-commons";
 import { getUserNextState } from "../auth/utils";
 import Decimal from "decimal.js";
-import { getUser, getUserWallets, getWalletAddress } from "./db";
+import { createUserWallets, getUser, getUserWalletQrCodes, getUserWallets, getWalletAddress } from "./db";
 import { getWalletDetails } from "../dashboard/utils";
+import { generateReceiveQRCode } from "../../wallet-functions/receive";
 
 const router = Router();
 
@@ -41,11 +42,7 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
       return;
     }
 
-    const user = await prisma.user_details.findUnique({
-      where: {
-        user_id: req.userId,
-      },
-    });
+    const user = await getUser(req.userId);
 
     if (!user) {
       res.status(403).json({
@@ -55,28 +52,16 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
       return;
     }
 
-    const { wallets } = data;
-    const response = await createWallets(wallets);
-    await prisma.user_wallet_details.createMany({
-      data: response.map((wallet) => ({
-        user_id: user.row_id,
-        raw_user_id: user.user_id,
-        wallet_address: wallet.keyPair.publicKey,
-        wallet_private_key:
-          typeof wallet.keyPair.privateKey === "string"
-            ? wallet.keyPair.privateKey
-            : JSON.stringify(wallet.keyPair.privateKey),
-        wallet_type: wallet.walletType,
-      })),
-    });
-    await prisma.user_details.update({
-      where: {
-        user_id: req.userId,
-      },
-      data: {
-        user_state: getUserNextState(user.user_state),
-      },
-    });
+    const response = await createWallets(data.wallets);
+
+    await createUserWallets(
+      user.rowId,
+      user.userId,
+      response,
+      user.userState,
+      getUserNextState
+    );
+
     res.status(200).json({
       success: true,
       message: "Wallets created successfully",
@@ -94,11 +79,7 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
 
 router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
   try {
-    const user = await prisma.user_details.findUnique({
-      where: {
-        user_id: req.userId,
-      },
-    });
+    const user = await getUser(req.userId);
 
     if (!user) {
       res.status(403).json({
@@ -110,7 +91,7 @@ router.get("/get-eligible-wallets", async (req: Request, res: Response) => {
 
     const wallets = await prisma.user_wallet_details.findMany({
       where: {
-        user_id: user.row_id,
+        user_id: user.rowId,
       },
       select: {
         wallet_type: true,
@@ -243,6 +224,35 @@ router.post("/send-coin", async (req: Request, res: Response) => {
     return;
   }
 });
+
+router.get("/receive-coins", async (req: Request, res: Response) => {
+  try {
+    const user = await getUser(req.userId);
+
+    if (!user) {
+      res.status(403).json({
+        success: false,
+        message: "User Not Found",
+      });
+      return;
+    }
+
+    const qrData = await getUserWalletQrCodes(user.rowId);
+
+    res.status(200).json({
+      success: true,
+      wallets: qrData,
+    });
+    return;
+
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+    return;
+  }
+})
 
 export const walletRouter = router;
 

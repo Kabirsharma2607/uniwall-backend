@@ -6,6 +6,12 @@ export type GeneratedWalletType = {
   privateKey: string;
 };
 
+export type WalletQrType = {
+  wallet_address: string;
+  wallet_type: wallet_type;
+  qr_code_url: string;
+}
+
 export type DashboardResponseSchema = {
   username: string;
   walletDetails: WalletDetailsSchema[];
@@ -27,6 +33,7 @@ export type User = {
   username: string;
   rowId: bigint;
   userId: string;
+  userState: user_state;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -36,3 +43,4 @@ export type Wallet = {
   walletPublicAddress: string;
   walletPrivateKey: string;
 };
+
