@@ -1,9 +1,9 @@
 import QRCode from "qrcode";
-import { wallet_type } from "@prisma/client";
+import { WalletType } from "@kabir.26/uniwall-commons";
 
 export const generateReceiveQRCode = async (
   publicKey: string,
-  token: wallet_type
+  token: WalletType
 ) => {
   try {
     const data = `${token}:${publicKey}`;

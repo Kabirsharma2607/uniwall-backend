@@ -1,8 +1,8 @@
 import { Request, Response, Router } from "express";
 import { middleware } from "../middleware";
-import { PrismaClient, wallet_type } from "@prisma/client";
+import { PrismaClient,  } from "@prisma/client";
 import {
-  createWallets,
+  createSelectedWalletsKeyPair,
   getAllBalances,
   getNotSelectedWalletsList,
   getSelectedWalletBalance,
@@ -13,7 +13,6 @@ import {
   selectedWalletSchema,
   sendCoinSchema,
 } from "@kabir.26/uniwall-commons";
-import { getUserNextState } from "../auth/utils";
 import Decimal from "decimal.js";
 import {
   createUserWallets,
@@ -22,8 +21,7 @@ import {
   getUserWallets,
   getWalletAddress,
 } from "./db";
-import { getWalletDetails } from "../dashboard/utils";
-import { generateReceiveQRCode } from "../../wallet-functions/receive";
+import { createQrCodesForSelectedWallets } from "./utils"
 
 const router = Router();
 
@@ -58,15 +56,19 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
       return;
     }
 
-    const response = await createWallets(data.wallets);
+    const selectedWalletsKeyPair = await createSelectedWalletsKeyPair(data.wallets); 
 
-    await createUserWallets(
+    const wallets = await createUserWallets( 
       user.rowId,
       user.userId,
-      response,
-      user.userState,
-      getUserNextState
+      selectedWalletsKeyPair,
     );
+
+    createQrCodesForSelectedWallets(wallets.map((wallet) => ({
+      walletType: wallet.wallet_type,
+      walletRowId: wallet.row_id,
+      walletPublicKey: wallet.wallet_address
+    })))
 
     res.status(200).json({
       success: true,
@@ -161,7 +163,6 @@ router.get("/get-wallets-with-balance", async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       message: "User wallets balances successfully",
-      // wallets,
       balances: userBalances,
     });
     return;
@@ -193,7 +194,6 @@ router.post("/send-coin", async (req: Request, res: Response) => {
     const userWalletAddress = await getWalletAddress(
       user.rowId,
       walletType
-      // "PRIVATE"
     );
     console.log("user wallet", userWalletAddress);
     const selectedWalletBalance = await getSelectedWalletBalance(
@@ -259,6 +259,12 @@ router.get("/receive-coins", async (req: Request, res: Response) => {
   }
 });
 
-export const walletRouter = router;
+// router.get("/get-conversion-rates", async (req: Request, res: Response) => {
+//   return;
+// })
 
-// send, to, amount,
+// router.post("/buy-coin", async (req: Request, res: Response) => {
+//   return;
+// })
+
+export const walletRouter = router;

@@ -1,7 +1,6 @@
-import { PrismaClient, user_state, wallet_type } from "@prisma/client";
+import { PrismaClient, wallet_type } from "@prisma/client";
 import { User, Wallet, WalletQrType } from "../../types";
 import { GeneratedWalletKeyPairsType } from "./utils";
-import { generateReceiveQRCode } from "../../wallet-functions/receive";
 
 const prisma = new PrismaClient();
 
@@ -48,7 +47,6 @@ export const getUserWallets = async (rowId: bigint): Promise<Wallet[]> => {
 export const getWalletAddress = async (
   userId: bigint,
   walletType: wallet_type
-  // addressType?: "PRIVATE" | "PUBLIC"
 ): Promise<{
   privateKey: string;
   publicKey: string;
@@ -77,51 +75,38 @@ export const getWalletAddress = async (
   }
 };
 
+
 export const createUserWallets = async (
   userId: bigint,
   rawUserId: string,
   wallets: GeneratedWalletKeyPairsType[],
-  currentState: user_state,
-  getNextState: (state: user_state) => user_state
-) => {
-  for (const wallet of wallets) {
-    const createdWallet = await prisma.user_wallet_details.create({
-      data: {
-        user_id: userId,
-        raw_user_id: rawUserId,
-        wallet_address: wallet.keyPair.publicKey,
-        wallet_private_key:
-          typeof wallet.keyPair.privateKey === "string"
-            ? wallet.keyPair.privateKey
-            : JSON.stringify(wallet.keyPair.privateKey),
-        wallet_type: wallet.walletType,
-      },
-    });
-
-    const qr = await generateReceiveQRCode(
-      wallet.keyPair.publicKey,
-      wallet.walletType
-    );
-
-    if (qr.success && qr.qrCode) {
-      await prisma.user_wallets_qr_codes.create({
+): Promise<{
+  row_id: bigint;
+  user_id: bigint;
+  raw_user_id: string;
+  wallet_address: string;
+  wallet_private_key: string;
+  wallet_type: wallet_type;
+  created_at: Date;
+  updated_at: Date;
+}[]> => {
+  const createdWallets = await Promise.all(
+    wallets.map((wallet) =>
+      prisma.user_wallet_details.create({
         data: {
-          wallet_id: createdWallet.row_id,
-          qr_code_url: qr.qrCode,
+          user_id: userId,
+          raw_user_id: rawUserId,
+          wallet_address: wallet.keyPair.publicKey,
+          wallet_private_key: wallet.keyPair.privateKey,
+          wallet_type: wallet.walletType,
         },
-      });
-    } else {
-      console.log(
-        `Failed to generate QR for wallet: ${wallet.keyPair.publicKey}`
-      );
-    }
-  }
+      })
+    )
+  );
 
-  await prisma.user_details.update({
-    where: { user_id: rawUserId },
-    data: { user_state: getNextState(currentState) },
-  });
+  return createdWallets;
 };
+
 
 export const getUserWalletQrCodes = async (
   userId: bigint
@@ -144,8 +129,18 @@ export const getUserWalletQrCodes = async (
   });
 
   return qrCodes.map((item) => ({
-    wallet_address: item.user_wallet.wallet_address,
-    wallet_type: item.user_wallet.wallet_type,
-    qr_code_url: item.qr_code_url,
+    walletAddress: item.user_wallet.wallet_address,
+    walletType: item.user_wallet.wallet_type,
+    qrCodeUrl: item.qr_code_url,
   }));
 };
+
+
+export const createQrEntryInDB = (rowId: bigint, qrCode: string) => {
+  prisma.user_wallets_qr_codes.create({
+        data: {
+          wallet_id: rowId,
+          qr_code_url: qrCode,
+        },
+      });
+}

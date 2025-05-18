@@ -7,9 +7,9 @@ export type GeneratedWalletType = {
 };
 
 export type WalletQrType = {
-  wallet_address: string;
-  wallet_type: wallet_type;
-  qr_code_url: string;
+  walletAddress: string;
+  walletType: wallet_type;
+  qrCodeUrl: string;
 };
 
 export type DashboardResponseSchema = {
