@@ -123,7 +123,9 @@ export const createUserWallets = async (
   });
 };
 
-export const getUserWalletQrCodes = async (userId: bigint) : Promise<WalletQrType[]> => {
+export const getUserWalletQrCodes = async (
+  userId: bigint
+): Promise<WalletQrType[]> => {
   const qrCodes = await prisma.user_wallets_qr_codes.findMany({
     where: {
       user_wallet: {

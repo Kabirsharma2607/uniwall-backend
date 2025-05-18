@@ -15,7 +15,13 @@ import {
 } from "@kabir.26/uniwall-commons";
 import { getUserNextState } from "../auth/utils";
 import Decimal from "decimal.js";
-import { createUserWallets, getUser, getUserWalletQrCodes, getUserWallets, getWalletAddress } from "./db";
+import {
+  createUserWallets,
+  getUser,
+  getUserWalletQrCodes,
+  getUserWallets,
+  getWalletAddress,
+} from "./db";
 import { getWalletDetails } from "../dashboard/utils";
 import { generateReceiveQRCode } from "../../wallet-functions/receive";
 
@@ -244,7 +250,6 @@ router.get("/receive-coins", async (req: Request, res: Response) => {
       wallets: qrData,
     });
     return;
-
   } catch (e) {
     res.status(500).json({
       success: false,
@@ -252,7 +257,7 @@ router.get("/receive-coins", async (req: Request, res: Response) => {
     });
     return;
   }
-})
+});
 
 export const walletRouter = router;
 

@@ -10,7 +10,7 @@ export type WalletQrType = {
   wallet_address: string;
   wallet_type: wallet_type;
   qr_code_url: string;
-}
+};
 
 export type DashboardResponseSchema = {
   username: string;
@@ -43,4 +43,3 @@ export type Wallet = {
   walletPublicAddress: string;
   walletPrivateKey: string;
 };
-
