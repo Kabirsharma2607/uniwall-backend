@@ -2,6 +2,8 @@ import { wallet_type } from "@prisma/client";
 import { walletSendMap } from "./walletMap";
 import { convertCurrency } from "./utils";
 import { getAdminWithMinBalance } from "./adminWallet";
+import { WalletType } from "@kabir.26/uniwall-commons";
+import { getSolanaBalance } from "../wallet-functions/solana";
 
 type SwapTokenType = {
   userPrivateKey: string; // stringified private key of user
@@ -12,14 +14,14 @@ type SwapTokenType = {
   amount: number;
 };
 
-export async function swapToken({
+export const swapToken = async ({
   userPrivateKey,
   userWalletAddress,
   userTargetWallet,
   from,
   to,
   amount,
-}: SwapTokenType) {
+}: SwapTokenType) => {
   if (!userTargetWallet) {
     console.log(`User has no ${to} wallet, ask to create`);
     return;
@@ -68,4 +70,23 @@ export async function swapToken({
   }
 
   console.log(`Swap successful: ${amount} ${from} → ${convertedAmount} ${to}`);
+}
+
+export const buyCoins = async (userWalletAddress : string, amount: number, walletType: WalletType) : Promise<"SUCCESS" | "FAILURE"> => {
+  
+  const admin = await getAdminWithMinBalance(walletType, amount);
+  if (!admin) {
+    console.log("Not enough admin balance");
+    return "FAILURE";
+  }
+
+  const buyFrom = walletSendMap[walletType];
+
+  const status = await buyFrom(
+    admin.private_key,
+    userWalletAddress,
+    amount.toString()
+  );
+  
+  return status.state;
 }

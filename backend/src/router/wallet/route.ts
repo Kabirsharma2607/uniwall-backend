@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { middleware } from "../middleware";
-import { PrismaClient,  } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import {
   createSelectedWalletsKeyPair,
   getAllBalances,
@@ -10,6 +10,7 @@ import {
   sendCoinFromOneWalletToAnother,
 } from "./utils";
 import {
+  buyCoinSchema,
   selectedWalletSchema,
   sendCoinSchema,
 } from "@kabir.26/uniwall-commons";
@@ -21,7 +22,9 @@ import {
   getUserWallets,
   getWalletAddress,
 } from "./db";
-import { createQrCodesForSelectedWallets } from "./utils"
+import { createQrCodesForSelectedWallets } from "./utils";
+import { getConversionRates } from "../../action-items/utils";
+import { buyCoins } from "../../action-items";
 
 const router = Router();
 
@@ -56,19 +59,23 @@ router.post("/select-wallet", async (req: Request, res: Response) => {
       return;
     }
 
-    const selectedWalletsKeyPair = await createSelectedWalletsKeyPair(data.wallets); 
-
-    const wallets = await createUserWallets( 
-      user.rowId,
-      user.userId,
-      selectedWalletsKeyPair,
+    const selectedWalletsKeyPair = await createSelectedWalletsKeyPair(
+      data.wallets
     );
 
-    createQrCodesForSelectedWallets(wallets.map((wallet) => ({
-      walletType: wallet.wallet_type,
-      walletRowId: wallet.row_id,
-      walletPublicKey: wallet.wallet_address
-    })))
+    const wallets = await createUserWallets(
+      user.rowId,
+      user.userId,
+      selectedWalletsKeyPair
+    );
+
+    createQrCodesForSelectedWallets(
+      wallets.map((wallet) => ({
+        walletType: wallet.wallet_type,
+        walletRowId: wallet.row_id,
+        walletPublicKey: wallet.wallet_address,
+      }))
+    );
 
     res.status(200).json({
       success: true,
@@ -191,10 +198,7 @@ router.post("/send-coin", async (req: Request, res: Response) => {
     const { amount, receiverPublicAddress, walletType } = data;
     const user = await getUser(req.userId);
     console.log("user");
-    const userWalletAddress = await getWalletAddress(
-      user.rowId,
-      walletType
-    );
+    const userWalletAddress = await getWalletAddress(user.rowId, walletType);
     console.log("user wallet", userWalletAddress);
     const selectedWalletBalance = await getSelectedWalletBalance(
       userWalletAddress.publicKey,
@@ -259,12 +263,78 @@ router.get("/receive-coins", async (req: Request, res: Response) => {
   }
 });
 
-// router.get("/get-conversion-rates", async (req: Request, res: Response) => {
-//   return;
-// })
+router.get("/get-conversion-rates", async (req: Request, res: Response) => {
+  try {
+    const user = await getUser(req.userId);
 
-// router.post("/buy-coin", async (req: Request, res: Response) => {
-//   return;
-// })
+    const conversionRates = await getConversionRates(user.rowId);
+
+    res.status(200).json({
+      success: true,
+      message: "Prices fetched successfully",
+      balances: conversionRates,
+    });
+    return;
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server error",
+    });
+    return;
+  }
+});
+
+router.post("/buy-coin", async (req: Request, res: Response) => {
+  try {
+    const { success, error, data } = buyCoinSchema.safeParse(req.body);
+    if (!success || error) {
+      res.status(400).send({
+        success: false,
+        message: "Invalid body schema",
+      });
+      return;
+    }
+
+    const user = await getUser(req.userId);
+
+    const wallets = await getUserWallets(user.rowId);
+
+    const { amount, walletType } = data;
+
+    const selectedWallet = wallets.find(
+      (wallet) => wallet.walletType === walletType
+    );
+
+    if (!selectedWallet) {
+      throw new Error("No Wallet Corresponding To Selected Wallet Type.");
+    }
+
+    const status = await buyCoins(
+      selectedWallet.walletPublicAddress,
+      Number(amount),
+      walletType
+    );
+
+    if (status === "FAILURE") {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server error",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `${amount} ${walletType} has been deposited to your account with address ${selectedWallet.walletPublicAddress}`,
+    });
+    return;
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server error",
+    });
+    return;
+  }
+});
 
 export const walletRouter = router;

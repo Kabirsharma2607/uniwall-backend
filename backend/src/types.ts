@@ -43,3 +43,9 @@ export type Wallet = {
   walletPublicAddress: string;
   walletPrivateKey: string;
 };
+
+export type CurrencyRate = {
+  walletType: wallet_type;
+  balance: string;
+  walletAddress: string;
+}
