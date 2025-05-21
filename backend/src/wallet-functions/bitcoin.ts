@@ -74,3 +74,30 @@ export const sendBitcoin = async (
     };
   }
 };
+
+export const buyBitcoin = async (
+  receiverPublicKey: string,
+  amountInBTC: string,
+  userId: bigint
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
+  try {
+    await updateWalletBalance(
+      "BTC",
+      receiverPublicKey,
+      userId,
+      amountInBTC,
+      "BUY"
+    );
+    return {
+      signature: "",
+      state: "SUCCESS",
+    };
+  } catch (error) {
+    return {
+      state: "FAILURE",
+    };
+  }
+};

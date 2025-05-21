@@ -1,7 +1,7 @@
 import { getSolanaBalance, sendSolana } from "../wallet-functions/solana";
-import { getEthereumBalance, sendEther } from "../wallet-functions/ethers";
-import { getPolkadotBalance, sendPalo } from "../wallet-functions/palo";
-import { getBitcoinBalance, sendBitcoin } from "../wallet-functions/bitcoin";
+import { buyEther, getEthereumBalance, sendEther } from "../wallet-functions/ethers";
+import { buyPalo, getPolkadotBalance, sendPalo } from "../wallet-functions/palo";
+import { buyBitcoin, getBitcoinBalance, sendBitcoin } from "../wallet-functions/bitcoin";
 import { WalletType } from "@kabir.26/uniwall-commons";
 
 /**
@@ -41,4 +41,12 @@ export const walletSendMap: Record<WalletType, SendFunction> = {
   ETH: sendEther,
   PALO: sendPalo,
   BTC: sendBitcoin,
+};
+
+
+export const walletBuyMap: Record<WalletType, SendFunction> = {
+  SOL: sendSolana,
+  ETH: buyEther,
+  PALO: buyPalo,
+  BTC: buyBitcoin,
 };

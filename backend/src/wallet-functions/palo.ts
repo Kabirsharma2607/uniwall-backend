@@ -63,3 +63,30 @@ export const sendPalo = async (
     };
   }
 };
+
+export const buyPalo = async (
+  receiverPublicKey: string,
+  amountInPALO: string,
+  userId: bigint
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
+  try {
+    await updateWalletBalance(
+      "PALO",
+      receiverPublicKey,
+      userId,
+      amountInPALO,
+      "BUY"
+    );
+    return {
+      signature: "",
+      state: "SUCCESS",
+    };
+  } catch (error) {
+    return {
+      state: "FAILURE",
+    };
+  }
+};

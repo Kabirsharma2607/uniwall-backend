@@ -1,5 +1,5 @@
 import { wallet_type } from "@prisma/client";
-import { walletSendMap } from "./walletMap";
+import { walletBuyMap, walletSendMap } from "./walletMap";
 import { convertCurrency } from "./utils";
 import { getAdminWithMinBalance } from "./adminWallet";
 import { WalletType } from "@kabir.26/uniwall-commons";
@@ -93,7 +93,7 @@ export const buyCoins = async (
   }
   }
 
-  const buyFrom = walletSendMap[walletType];
+  const buyFrom = walletBuyMap[walletType];
 
   const status = await buyFrom(
     userWalletAddress,
