@@ -39,14 +39,18 @@ export const getSolanaBalance = async (
 };
 
 export const sendSolana = async (
-  senderPrivateKey: string, // stringified array like "[1,2,3,...]"
   receiverPublicKey: string,
   amountInSol: string,
-  userId: bigint
+  userId: bigint,
+  senderPrivateKey?: string, // stringified array like "[1,2,3,...]"
+
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;
 }> => {
+  if (!senderPrivateKey){
+    return {state: "FAILURE"};
+  }
   const connection = new Connection(
     "https://api.devnet.solana.com",
     "confirmed"

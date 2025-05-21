@@ -153,21 +153,20 @@ export const sendCoinFromOneWalletToAnother = async (
   switch (walletType) {
     case "BTC":
       return sendBitcoin(
-        senderPrivateKey,
         receiverPublicAddress,
         amount,
-        userId
+        userId,
       );
     case "ETH":
-      return sendEther(senderPrivateKey, receiverPublicAddress, amount, userId);
+      return sendEther(receiverPublicAddress, amount, userId);
     case "PALO":
-      return sendPalo(senderPrivateKey, receiverPublicAddress, amount, userId);
+      return sendPalo(receiverPublicAddress, amount, userId);
     case "SOL":
       return sendSolana(
-        senderPrivateKey,
         receiverPublicAddress,
         amount,
-        userId
+        userId,
+        senderPrivateKey
       );
   }
 };

@@ -22,10 +22,9 @@ export const getEthereumBalance = async (address: string): Promise<string> => {
 };
 
 export const sendEther = async (
-  senderPrivateKey: string,
   receiverPublicKey: string,
   amountInETH: string,
-  userId: bigint
+  userId: bigint,
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;

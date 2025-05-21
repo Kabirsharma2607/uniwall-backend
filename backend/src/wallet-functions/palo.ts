@@ -36,7 +36,6 @@ export const getPolkadotBalance = async (address: string): Promise<string> => {
 };
 
 export const sendPalo = async (
-  senderPrivateKey: string,
   receiverPublicKey: string,
   amountInPALO: string,
   userId: bigint

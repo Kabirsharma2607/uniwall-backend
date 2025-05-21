@@ -14,10 +14,10 @@ type BalanceFetcher = (address: string) => Promise<string>;
  * Returns transaction hash or ID.
  */
 type SendFunction = (
-  from: string,
   to: string,
   amount: string,
-  userId: bigint
+  userId: bigint,
+  from?: string,
 ) => Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;

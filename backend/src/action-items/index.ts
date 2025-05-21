@@ -3,7 +3,6 @@ import { walletSendMap } from "./walletMap";
 import { convertCurrency } from "./utils";
 import { getAdminWithMinBalance } from "./adminWallet";
 import { WalletType } from "@kabir.26/uniwall-commons";
-import { getSolanaBalance } from "../wallet-functions/solana";
 
 type SwapTokenType = {
   userId: bigint;
@@ -43,10 +42,10 @@ export const swapToken = async ({
 
   // Step 1: User sends `amount` of `from` token to admin
   const sent = await sendFromUser(
-    userPrivateKey,
     admin.wallet_address,
     amount.toString(),
-    userId
+    userId,
+    userPrivateKey,
   );
   if (!sent) {
     console.log("Transfer from user to admin failed");
@@ -55,20 +54,20 @@ export const swapToken = async ({
 
   // Step 2: Admin sends `convertedAmount` of `to` token to user
   const sentBack = await sendFromAdmin(
-    admin.private_key,
     userTargetWallet,
     convertedAmount.toString(),
-    userId
+    userId,
+    admin.private_key,
   );
   if (!sentBack) {
     console.log("Admin to user failed, refunding...");
 
     // Simulate refund (admin sends back the original amount to user)
     await sendFromAdmin(
-      admin.private_key,
       userWalletAddress,
       amount.toString(),
-      userId
+      userId,
+      admin.private_key,
     );
     console.log("Refund done");
     return;
@@ -83,19 +82,24 @@ export const buyCoins = async (
   amount: number,
   walletType: WalletType
 ): Promise<"SUCCESS" | "FAILURE"> => {
-  const admin = await getAdminWithMinBalance(walletType, amount);
+  
+  let admin;
+
+  if (walletType == "SOL"){
+    admin = await getAdminWithMinBalance(walletType, amount);
   if (!admin) {
     console.log("Not enough admin balance");
     return "FAILURE";
+  }
   }
 
   const buyFrom = walletSendMap[walletType];
 
   const status = await buyFrom(
-    admin.private_key,
     userWalletAddress,
     amount.toString(),
-    userId
+    userId,
+    admin?.private_key,
   );
 
   return status.state;

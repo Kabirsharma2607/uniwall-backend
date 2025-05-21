@@ -3,7 +3,6 @@ import * as ecc from "tiny-secp256k1";
 import { ECPairFactory } from "ecpair";
 import { GeneratedWalletType } from "../types";
 import axios from "axios";
-import { Prisma } from "@prisma/client";
 import { updateWalletBalance } from "../router/wallet/db";
 
 // Create ECPair instance with ecc
@@ -47,7 +46,6 @@ export const getBitcoinBalance = async (address: string): Promise<string> => {
 };
 
 export const sendBitcoin = async (
-  senderPrivateKey: string,
   receiverPublicKey: string,
   amountInBTC: string,
   userId: bigint
