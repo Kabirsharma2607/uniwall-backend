@@ -1,6 +1,7 @@
 import { ethers, AlchemyProvider } from "ethers";
 import { GeneratedWalletType } from "../types";
 import dotenv from "dotenv";
+import { updateWalletBalance } from "../router/wallet/db";
 dotenv.config();
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
@@ -23,10 +24,28 @@ export const getEthereumBalance = async (address: string): Promise<string> => {
 export const sendEther = async (
   senderPrivateKey: string,
   receiverPublicKey: string,
-  amountInETH: string
+  amountInETH: string,
+  userId: bigint
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;
 }> => {
-  return { signature: "Dummy Transaction Hash", state: "SUCCESS" };
+  try {
+    await updateWalletBalance(
+      "ETH",
+      receiverPublicKey,
+      userId,
+      amountInETH,
+      "SEND"
+    );
+    return {
+      signature: "",
+      state: "SUCCESS",
+    };
+  } catch (error) {
+    return {
+      state: "FAILURE",
+    };
+  }
+  // return { signature: "Dummy Transaction Hash", state: "SUCCESS" };
 };

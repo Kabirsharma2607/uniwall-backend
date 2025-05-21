@@ -21,8 +21,8 @@ import {
 } from "../../wallet-functions/bitcoin";
 import { WalletType } from "@kabir.26/uniwall-commons";
 import { wallet_type } from "@prisma/client";
-import { generateReceiveQRCode } from "../../action-items/receive"
-import { createQrEntryInDB } from "./db"
+import { generateReceiveQRCode } from "../../action-items/receive";
+import { createQrEntryInDB } from "./db";
 
 export type GeneratedWalletKeyPairsType = {
   walletType: WalletType;
@@ -34,7 +34,9 @@ export type WalletBalanceType = {
   balance: string;
 };
 
-export const createSelectedWalletsKeyPair = async (requestedWallets: WalletType[]) => {
+export const createSelectedWalletsKeyPair = async (
+  requestedWallets: WalletType[]
+) => {
   const response: GeneratedWalletKeyPairsType[] = [];
 
   for (const wallet of requestedWallets) {
@@ -142,20 +144,31 @@ export const sendCoinFromOneWalletToAnother = async (
   senderPrivateKey: string,
   walletType: wallet_type,
   receiverPublicAddress: string,
-  amount: string
+  amount: string,
+  userId: bigint
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;
 }> => {
   switch (walletType) {
     case "BTC":
-      return sendBitcoin(senderPrivateKey, receiverPublicAddress, amount);
+      return sendBitcoin(
+        senderPrivateKey,
+        receiverPublicAddress,
+        amount,
+        userId
+      );
     case "ETH":
-      return sendEther(senderPrivateKey, receiverPublicAddress, amount);
+      return sendEther(senderPrivateKey, receiverPublicAddress, amount, userId);
     case "PALO":
-      return sendPalo(senderPrivateKey, receiverPublicAddress, amount);
+      return sendPalo(senderPrivateKey, receiverPublicAddress, amount, userId);
     case "SOL":
-      return sendSolana(senderPrivateKey, receiverPublicAddress, amount);
+      return sendSolana(
+        senderPrivateKey,
+        receiverPublicAddress,
+        amount,
+        userId
+      );
   }
 };
 
@@ -165,12 +178,13 @@ export const getTransactionStatus = (state: "FAILURE" | "SUCCESS"): string => {
     : "Transaction Successful";
 };
 
-
-export const createQrCodesForSelectedWallets = async (wallets: {
-  walletType: WalletType;
-  walletRowId: bigint;
-  walletPublicKey: string;
-}[]) => {
+export const createQrCodesForSelectedWallets = async (
+  wallets: {
+    walletType: WalletType;
+    walletRowId: bigint;
+    walletPublicKey: string;
+  }[]
+) => {
   for (const wallet of wallets) {
     const qr = await generateReceiveQRCode(
       wallet.walletPublicKey,
@@ -178,9 +192,11 @@ export const createQrCodesForSelectedWallets = async (wallets: {
     );
 
     if (qr.success && qr.qrCode) {
-      createQrEntryInDB(wallet.walletRowId, qr.qrCode)
+      createQrEntryInDB(wallet.walletRowId, qr.qrCode);
     } else {
-      console.log(`Failed to generate QR for wallet: ${wallet.walletPublicKey}`);
+      console.log(
+        `Failed to generate QR for wallet: ${wallet.walletPublicKey}`
+      );
     }
   }
 };

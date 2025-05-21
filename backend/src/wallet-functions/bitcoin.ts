@@ -4,6 +4,7 @@ import { ECPairFactory } from "ecpair";
 import { GeneratedWalletType } from "../types";
 import axios from "axios";
 import { Prisma } from "@prisma/client";
+import { updateWalletBalance } from "../router/wallet/db";
 
 // Create ECPair instance with ecc
 const ECPair = ECPairFactory(ecc);
@@ -48,10 +49,27 @@ export const getBitcoinBalance = async (address: string): Promise<string> => {
 export const sendBitcoin = async (
   senderPrivateKey: string,
   receiverPublicKey: string,
-  amountInBTC: string
+  amountInBTC: string,
+  userId: bigint
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;
 }> => {
-  return { signature: "Dummy Transaction Hash", state: "SUCCESS" };
+  try {
+    await updateWalletBalance(
+      "BTC",
+      receiverPublicKey,
+      userId,
+      amountInBTC,
+      "SEND"
+    );
+    return {
+      signature: "",
+      state: "SUCCESS",
+    };
+  } catch (error) {
+    return {
+      state: "FAILURE",
+    };
+  }
 };

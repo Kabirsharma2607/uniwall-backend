@@ -16,7 +16,8 @@ type BalanceFetcher = (address: string) => Promise<string>;
 type SendFunction = (
   from: string,
   to: string,
-  amount: string
+  amount: string,
+  userId: bigint
 ) => Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;

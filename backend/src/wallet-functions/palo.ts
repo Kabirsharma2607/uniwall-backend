@@ -2,6 +2,7 @@ import { cryptoWaitReady, mnemonicGenerate } from "@polkadot/util-crypto";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
 import { GeneratedWalletType } from "../types";
+import { updateWalletBalance } from "../router/wallet/db";
 
 export const createPolkadotWallet = async (): Promise<GeneratedWalletType> => {
   await cryptoWaitReady();
@@ -37,10 +38,27 @@ export const getPolkadotBalance = async (address: string): Promise<string> => {
 export const sendPalo = async (
   senderPrivateKey: string,
   receiverPublicKey: string,
-  amountInPALO: string
+  amountInPALO: string,
+  userId: bigint
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;
 }> => {
-  return { signature: "Dummy Transaction Hash", state: "SUCCESS" };
+  try {
+    await updateWalletBalance(
+      "PALO",
+      receiverPublicKey,
+      userId,
+      amountInPALO,
+      "SEND"
+    );
+    return {
+      signature: "",
+      state: "SUCCESS",
+    };
+  } catch (error) {
+    return {
+      state: "FAILURE",
+    };
+  }
 };

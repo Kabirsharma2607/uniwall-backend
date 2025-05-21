@@ -218,7 +218,8 @@ router.post("/send-coin", async (req: Request, res: Response) => {
       userWalletAddress.privateKey,
       walletType,
       receiverPublicAddress,
-      amount
+      amount,
+      user.rowId
     );
     console.log("trans status", transactionStatus);
     res.status(200).send({
@@ -311,6 +312,7 @@ router.post("/buy-coin", async (req: Request, res: Response) => {
 
     const status = await buyCoins(
       selectedWallet.walletPublicAddress,
+      user.rowId,
       Number(amount),
       walletType
     );

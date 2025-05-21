@@ -1,6 +1,7 @@
 import { PrismaClient, wallet_type } from "@prisma/client";
 import { User, Wallet, WalletQrType } from "../../types";
 import { GeneratedWalletKeyPairsType } from "./utils";
+import { WalletType } from "@kabir.26/uniwall-commons";
 
 const prisma = new PrismaClient();
 
@@ -75,21 +76,22 @@ export const getWalletAddress = async (
   }
 };
 
-
 export const createUserWallets = async (
   userId: bigint,
   rawUserId: string,
-  wallets: GeneratedWalletKeyPairsType[],
-): Promise<{
-  row_id: bigint;
-  user_id: bigint;
-  raw_user_id: string;
-  wallet_address: string;
-  wallet_private_key: string;
-  wallet_type: wallet_type;
-  created_at: Date;
-  updated_at: Date;
-}[]> => {
+  wallets: GeneratedWalletKeyPairsType[]
+): Promise<
+  {
+    row_id: bigint;
+    user_id: bigint;
+    raw_user_id: string;
+    wallet_address: string;
+    wallet_private_key: string;
+    wallet_type: wallet_type;
+    created_at: Date;
+    updated_at: Date;
+  }[]
+> => {
   const createdWallets = await Promise.all(
     wallets.map((wallet) =>
       prisma.user_wallet_details.create({
@@ -106,7 +108,6 @@ export const createUserWallets = async (
 
   return createdWallets;
 };
-
 
 export const getUserWalletQrCodes = async (
   userId: bigint
@@ -135,12 +136,98 @@ export const getUserWalletQrCodes = async (
   }));
 };
 
-
 export const createQrEntryInDB = (rowId: bigint, qrCode: string) => {
   prisma.user_wallets_qr_codes.create({
-        data: {
-          wallet_id: rowId,
-          qr_code_url: qrCode,
+    data: {
+      wallet_id: rowId,
+      qr_code_url: qrCode,
+    },
+  });
+};
+
+export const updateWalletBalance = async (
+  fromWalletType: WalletType,
+  receiverPublicAddress: string,
+  userId: bigint,
+  amount: string,
+  source: "SWAP" | "BUY" | "SEND"
+) => {
+  try {
+    switch (source) {
+      case "SWAP":
+      case "SEND":
+        await sendBalance(
+          fromWalletType,
+          receiverPublicAddress,
+          userId,
+          amount
+        );
+        return;
+      case "BUY":
+        await incrementUserBalance(receiverPublicAddress, amount);
+        return;
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+const sendBalance = async (
+  fromWalletType: WalletType,
+  receiverPublicAddress: string,
+  userId: bigint,
+  amount: string
+) => {
+  await prisma.$transaction(async (tx) => {
+    await decrementUserBalance(userId, amount, fromWalletType);
+    const receiverResponse = await tx.user_wallet_details.findUnique({
+      where: {
+        wallet_address: receiverPublicAddress,
+      },
+    });
+    if (!receiverResponse) {
+      return;
+    }
+    incrementUserBalance(receiverPublicAddress, amount);
+  });
+};
+
+const incrementUserBalance = async (
+  receiverPublicAddress: string,
+  amount: string
+) => {
+  await prisma.$transaction(async (tx) => {
+    await tx.user_wallet_details.update({
+      where: {
+        wallet_address: receiverPublicAddress,
+      },
+      data: {
+        wallet_balance: {
+          increment: parseFloat(amount),
         },
-      });
-}
+      },
+    });
+  });
+};
+
+const decrementUserBalance = async (
+  userId: bigint,
+  amount: string,
+  walletType: WalletType
+) => {
+  await prisma.$transaction(async (tx) => {
+    await tx.user_wallet_details.update({
+      where: {
+        user_id_wallet_type: {
+          user_id: userId,
+          wallet_type: walletType,
+        },
+      },
+      data: {
+        wallet_balance: {
+          decrement: parseFloat(amount),
+        },
+      },
+    });
+  });
+};

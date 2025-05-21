@@ -41,7 +41,8 @@ export const getSolanaBalance = async (
 export const sendSolana = async (
   senderPrivateKey: string, // stringified array like "[1,2,3,...]"
   receiverPublicKey: string,
-  amountInSol: string
+  amountInSol: string,
+  userId: bigint
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;

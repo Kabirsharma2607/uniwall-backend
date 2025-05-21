@@ -6,6 +6,7 @@ import { WalletType } from "@kabir.26/uniwall-commons";
 import { getSolanaBalance } from "../wallet-functions/solana";
 
 type SwapTokenType = {
+  userId: bigint;
   userPrivateKey: string; // stringified private key of user
   userWalletAddress: string;
   userTargetWallet: string | null;
@@ -21,6 +22,7 @@ export const swapToken = async ({
   from,
   to,
   amount,
+  userId,
 }: SwapTokenType) => {
   if (!userTargetWallet) {
     console.log(`User has no ${to} wallet, ask to create`);
@@ -43,7 +45,8 @@ export const swapToken = async ({
   const sent = await sendFromUser(
     userPrivateKey,
     admin.wallet_address,
-    amount.toString()
+    amount.toString(),
+    userId
   );
   if (!sent) {
     console.log("Transfer from user to admin failed");
@@ -54,7 +57,8 @@ export const swapToken = async ({
   const sentBack = await sendFromAdmin(
     admin.private_key,
     userTargetWallet,
-    convertedAmount.toString()
+    convertedAmount.toString(),
+    userId
   );
   if (!sentBack) {
     console.log("Admin to user failed, refunding...");
@@ -63,17 +67,22 @@ export const swapToken = async ({
     await sendFromAdmin(
       admin.private_key,
       userWalletAddress,
-      amount.toString()
+      amount.toString(),
+      userId
     );
     console.log("Refund done");
     return;
   }
 
   console.log(`Swap successful: ${amount} ${from} → ${convertedAmount} ${to}`);
-}
+};
 
-export const buyCoins = async (userWalletAddress : string, amount: number, walletType: WalletType) : Promise<"SUCCESS" | "FAILURE"> => {
-  
+export const buyCoins = async (
+  userWalletAddress: string,
+  userId: bigint,
+  amount: number,
+  walletType: WalletType
+): Promise<"SUCCESS" | "FAILURE"> => {
   const admin = await getAdminWithMinBalance(walletType, amount);
   if (!admin) {
     console.log("Not enough admin balance");
@@ -85,8 +94,9 @@ export const buyCoins = async (userWalletAddress : string, amount: number, walle
   const status = await buyFrom(
     admin.private_key,
     userWalletAddress,
-    amount.toString()
+    amount.toString(),
+    userId
   );
-  
+
   return status.state;
-}
+};
