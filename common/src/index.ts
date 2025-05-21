@@ -45,3 +45,10 @@ export const sendCoinSchema = z.object({
 });
 
 export type SendCoinSchema = z.infer<typeof sendCoinSchema>;
+
+export const buyCoinSchema = z.object({
+  amount: z.string(),
+  walletType: Wallets,
+})
+
+export type BuyCoinSchema = z.infer<typeof buyCoinSchema>;
