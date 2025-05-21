@@ -231,3 +231,22 @@ const decrementUserBalance = async (
     });
   });
 };
+
+export const getUserWalletBalance = async (
+  walletType: WalletType,
+  walletAddress: string
+): Promise<number> => {
+  try {
+    const walletDetails = await prisma.user_wallet_details.findUnique({
+      where: {
+        wallet_address: walletAddress,
+      },
+    });
+    if (!walletDetails) {
+      return 0;
+    }
+    return walletDetails.wallet_balance;
+  } catch (error) {
+    return 0;
+  }
+};

@@ -1,7 +1,7 @@
 import { ethers, AlchemyProvider } from "ethers";
 import { GeneratedWalletType } from "../types";
 import dotenv from "dotenv";
-import { updateWalletBalance } from "../router/wallet/db";
+import { getUserWalletBalance, updateWalletBalance } from "../router/wallet/db";
 dotenv.config();
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
@@ -17,8 +17,10 @@ export const createEthereumWallet = (): GeneratedWalletType => {
 };
 
 export const getEthereumBalance = async (address: string): Promise<string> => {
-  const balance = await provider.getBalance(address);
-  return ethers.formatEther(balance); // returns balance in ETH
+  // const balance = await provider.getBalance(address);
+  // return ethers.formatEther(balance); // returns balance in ETH
+  const ethBalance = await getUserWalletBalance("ETH", address);
+  return ethBalance.toFixed(8);
 };
 
 export const sendEther = async (

@@ -3,7 +3,8 @@ import * as ecc from "tiny-secp256k1";
 import { ECPairFactory } from "ecpair";
 import { GeneratedWalletType } from "../types";
 import axios from "axios";
-import { updateWalletBalance } from "../router/wallet/db";
+import { Prisma } from "@prisma/client";
+import { getUserWalletBalance, updateWalletBalance } from "../router/wallet/db";
 
 // Create ECPair instance with ecc
 const ECPair = ECPairFactory(ecc);
@@ -35,14 +36,16 @@ export const createBitcoinWallet = (): GeneratedWalletType => {
 };
 
 export const getBitcoinBalance = async (address: string): Promise<string> => {
-  const res = await axios.get(
-    `https://blockstream.info/testnet/api/address/${address}`
-  );
-  const funded = res.data.chain_stats.funded_txo_sum;
-  const spent = res.data.chain_stats.spent_txo_sum;
-  const balanceInSatoshi = BigInt(funded) - BigInt(spent);
-  const balance = Number(balanceInSatoshi) / 1e8;
-  return balance.toFixed(8);
+  // const res = await axios.get(
+  //   `https://blockstream.info/testnet/api/address/${address}`
+  // );
+  // const funded = res.data.chain_stats.funded_txo_sum;
+  // const spent = res.data.chain_stats.spent_txo_sum;
+  // const balanceInSatoshi = BigInt(funded) - BigInt(spent);
+  // const balance = Number(balanceInSatoshi) / 1e8;
+  // return balance.toFixed(8);
+  const btcBalance = await getUserWalletBalance("BTC", address);
+  return btcBalance.toFixed(8);
 };
 
 export const sendBitcoin = async (
