@@ -1,8 +1,15 @@
 import { WalletType } from "@kabir.26/uniwall-commons";
+import { user_state, wallet_type } from "@prisma/client";
 
 export type GeneratedWalletType = {
   publicKey: string;
   privateKey: string;
+};
+
+export type WalletQrType = {
+  walletAddress: string;
+  walletType: wallet_type;
+  qrCodeUrl: string;
 };
 
 export type DashboardResponseSchema = {
@@ -21,3 +28,24 @@ export type ActionItemSchema = {
   actionItemType: "SEND" | "RECEIVE" | "SWAP" | "BUY";
   isEnabled: boolean;
 };
+
+export type User = {
+  username: string;
+  rowId: bigint;
+  userId: string;
+  userState: user_state;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type Wallet = {
+  walletType: wallet_type;
+  walletPublicAddress: string;
+  walletPrivateKey: string;
+};
+
+export type CurrencyRate = {
+  walletType: wallet_type;
+  balance: string;
+  walletAddress: string;
+}

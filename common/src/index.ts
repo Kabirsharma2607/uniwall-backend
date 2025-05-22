@@ -30,16 +30,33 @@ export const confirmCompletionSchema = z.object({
 
 export type ConfirmCompletionSchema = z.infer<typeof confirmCompletionSchema>;
 
-const Wallets = z.enum([
-  'BTC',
-  'ETH',
-  'SOL',
-  'PALO'
-]);
+const Wallets = z.enum(["BTC", "ETH", "SOL", "PALO"]);
 
 export type WalletType = z.infer<typeof Wallets>;
 
-
 export const selectedWalletSchema = z.object({
-  wallets: z.array(Wallets)
+  wallets: z.array(Wallets),
 });
+
+export const sendCoinSchema = z.object({
+  walletType: Wallets,
+  receiverPublicAddress: z.string(),
+  amount: z.string(),
+});
+
+export type SendCoinSchema = z.infer<typeof sendCoinSchema>;
+
+export const buyCoinSchema = z.object({
+  amount: z.string(),
+  walletType: Wallets,
+})
+
+export type BuyCoinSchema = z.infer<typeof buyCoinSchema>;
+
+export const swapCoinSchema = z.object({
+  fromWalletType: Wallets,
+  toWalletType: Wallets,
+  amount: z.string(),
+})
+
+export type SwapCoinSchema = z.infer<typeof swapCoinSchema>;

@@ -9,8 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET ?? "";
 declare global {
   namespace Express {
     interface Request {
-      userId?: string;
-      username?: string;
+      userId: string;
+      username: string;
     }
   }
 }
@@ -37,7 +37,7 @@ export const middleware = (req: Request, res: Response, next: NextFunction) => {
     next();
     return;
   } catch (e) {
-    res.status(500).json({
+    res.status(401).json({
       success: false,
       message: "Internal Server Error",
     });

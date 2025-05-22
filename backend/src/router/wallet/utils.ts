@@ -1,16 +1,30 @@
 import { GeneratedWalletType } from "../../types";
-import { createSolanaWallet } from "../../wallet-functions/solana";
-import { createEthereumWallet } from "../../wallet-functions/ethers";
-import { createPolkadotWallet } from "../../wallet-functions/palo";
-import { createBitcoinWallet } from "../../wallet-functions/bitcoin";
+import {
+  createSolanaWallet,
+  sendSolana,
+  getSolanaBalance,
+} from "../../wallet-functions/solana";
+import {
+  createEthereumWallet,
+  sendEther,
+  getEthereumBalance,
+} from "../../wallet-functions/ethers";
+import {
+  createPolkadotWallet,
+  sendPalo,
+  getPolkadotBalance,
+} from "../../wallet-functions/palo";
+import {
+  createBitcoinWallet,
+  sendBitcoin,
+  getBitcoinBalance,
+} from "../../wallet-functions/bitcoin";
 import { WalletType } from "@kabir.26/uniwall-commons";
 import { wallet_type } from "@prisma/client";
-import { getSolanaBalance } from "../../wallet-functions/solana";
-import { getPolkadotBalance } from "../../wallet-functions/palo";
-import { getBitcoinBalance } from "../../wallet-functions/bitcoin";
-import { getEthereumBalance } from "../../wallet-functions/ethers";
+import { generateReceiveQRCode } from "../../action-items/receive";
+import { createQrEntryInDB } from "./db";
 
-type GeneratedWalletKeyPairsType = {
+export type GeneratedWalletKeyPairsType = {
   walletType: WalletType;
   keyPair: GeneratedWalletType;
 };
@@ -20,7 +34,9 @@ export type WalletBalanceType = {
   balance: string;
 };
 
-export const createWallets = async (requestedWallets: WalletType[]) => {
+export const createSelectedWalletsKeyPair = async (
+  requestedWallets: WalletType[]
+) => {
   const response: GeneratedWalletKeyPairsType[] = [];
 
   for (const wallet of requestedWallets) {
@@ -50,7 +66,7 @@ export const getAllBalances = async (
     wallet_address: string;
     wallet_type: wallet_type;
   }[]
-) => {
+): Promise<WalletBalanceType[]> => {
   const balances: WalletBalanceType[] = [];
 
   for (const wallet of wallets) {
@@ -94,4 +110,88 @@ export const getNotSelectedWalletsList = (wallets: wallet_type[]) => {
   return availableWalletTypes.filter(
     (item) => !wallets.some((wallet) => wallet === item)
   );
+};
+
+export const getSelectedWalletBalance = async (
+  walletAddress: string,
+  wallet: WalletType
+): Promise<WalletBalanceType> => {
+  switch (wallet) {
+    case "BTC":
+      return {
+        balance: await getBitcoinBalance(walletAddress),
+        walletType: wallet,
+      };
+    case "ETH":
+      return {
+        balance: await getEthereumBalance(walletAddress),
+        walletType: wallet,
+      };
+    case "PALO":
+      return {
+        balance: await getPolkadotBalance(walletAddress),
+        walletType: wallet,
+      };
+    case "SOL":
+      return {
+        balance: await getSolanaBalance(walletAddress),
+        walletType: wallet,
+      };
+  }
+};
+
+export const sendCoinFromOneWalletToAnother = async (
+  senderPrivateKey: string,
+  walletType: wallet_type,
+  receiverPublicAddress: string,
+  amount: string,
+  userId: bigint
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
+  switch (walletType) {
+    case "BTC":
+      return sendBitcoin(receiverPublicAddress, amount, userId);
+    case "ETH":
+      return sendEther(receiverPublicAddress, amount, userId);
+    case "PALO":
+      return sendPalo(receiverPublicAddress, amount, userId);
+    case "SOL":
+      return sendSolana(
+        receiverPublicAddress,
+        amount,
+        userId,
+        senderPrivateKey
+      );
+  }
+};
+
+export const getTransactionStatus = (state: "FAILURE" | "SUCCESS"): string => {
+  return state === "FAILURE"
+    ? "Transaction failed. Please try again after some time"
+    : "Transaction Successful";
+};
+
+export const createQrCodesForSelectedWallets = async (
+  wallets: {
+    walletType: WalletType;
+    walletRowId: bigint;
+    walletPublicKey: string;
+  }[]
+) => {
+  for (const wallet of wallets) {
+    const qr = await generateReceiveQRCode(
+      wallet.walletPublicKey,
+      wallet.walletType
+    );
+
+    if (qr.success && qr.qrCode) {
+      await createQrEntryInDB(wallet.walletRowId, qr.qrCode);
+    } else {
+      console.log(
+        `Failed to generate QR for wallet: ${wallet.walletPublicKey}`
+      );
+    }
+  }
 };

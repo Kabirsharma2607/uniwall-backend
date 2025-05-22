@@ -1,7 +1,8 @@
 import { cryptoWaitReady, mnemonicGenerate } from "@polkadot/util-crypto";
-import { ApiPromise, WsProvider } from "@polkadot/api";
+// import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
 import { GeneratedWalletType } from "../types";
+import { getUserWalletBalance, updateWalletBalance } from "../router/wallet/db";
 
 export const createPolkadotWallet = async (): Promise<GeneratedWalletType> => {
   await cryptoWaitReady();
@@ -18,17 +19,74 @@ export const createPolkadotWallet = async (): Promise<GeneratedWalletType> => {
 
 export const getPolkadotBalance = async (address: string): Promise<string> => {
   try {
-    const provider = new WsProvider("wss://rpc.polkadot.io");
-    const api = await ApiPromise.create({ provider });
+    // console.log("polka balance");
+    // const provider = new WsProvider("wss://rpc.polkadot.io");
+    // const api = await ApiPromise.create({ provider });
 
-    const account = await api.query.system.account(address);
-    const { data: balance } = account.toHuman() as unknown as {
-      data: { free: string };
-    };
+    // const account = await api.query.system.account(address);
+    // const { data: balance } = account.toHuman() as unknown as {
+    //   data: { free: string };
+    // };
 
-    return balance.free;
+    // return balance.free;
+    const paloBalance = await getUserWalletBalance("ETH", address);
+    return paloBalance.toFixed(8);
   } catch (error) {
-    console.error("Error fetching Polkadot balance:", error);
+    console.log("Error fetching Polkadot balance:", error);
     throw error;
+  }
+};
+
+export const sendPalo = async (
+  receiverPublicKey: string,
+  amountInPALO: string,
+  userId: bigint
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
+  try {
+    await updateWalletBalance(
+      "PALO",
+      receiverPublicKey,
+      userId,
+      amountInPALO,
+      "SEND"
+    );
+    return {
+      signature: "",
+      state: "SUCCESS",
+    };
+  } catch (error) {
+    return {
+      state: "FAILURE",
+    };
+  }
+};
+
+export const buyPalo = async (
+  receiverPublicKey: string,
+  amountInPALO: string,
+  userId: bigint
+): Promise<{
+  state: "SUCCESS" | "FAILURE";
+  signature?: string;
+}> => {
+  try {
+    await updateWalletBalance(
+      "PALO",
+      receiverPublicKey,
+      userId,
+      amountInPALO,
+      "BUY"
+    );
+    return {
+      signature: "",
+      state: "SUCCESS",
+    };
+  } catch (error) {
+    return {
+      state: "FAILURE",
+    };
   }
 };
