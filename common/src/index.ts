@@ -52,3 +52,11 @@ export const buyCoinSchema = z.object({
 })
 
 export type BuyCoinSchema = z.infer<typeof buyCoinSchema>;
+
+export const swapCoinSchema = z.object({
+  fromWalletType: Wallets,
+  toWalletType: Wallets,
+  amount: z.string(),
+})
+
+export type SwapCoinSchema = z.infer<typeof swapCoinSchema>;

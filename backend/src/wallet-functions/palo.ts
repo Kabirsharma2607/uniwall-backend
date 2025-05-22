@@ -1,5 +1,5 @@
 import { cryptoWaitReady, mnemonicGenerate } from "@polkadot/util-crypto";
-import { ApiPromise, WsProvider } from "@polkadot/api";
+// import { ApiPromise, WsProvider } from "@polkadot/api";
 import { Keyring } from "@polkadot/keyring";
 import { GeneratedWalletType } from "../types";
 import { getUserWalletBalance, updateWalletBalance } from "../router/wallet/db";

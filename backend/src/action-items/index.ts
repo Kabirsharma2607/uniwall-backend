@@ -1,16 +1,19 @@
-import { wallet_type } from "@prisma/client";
 import { walletBuyMap, walletSendMap } from "./walletMap";
 import { convertCurrency } from "./utils";
 import { getAdminWithMinBalance } from "./adminWallet";
 import { WalletType } from "@kabir.26/uniwall-commons";
+import {
+  decrementUserBalance,
+  incrementUserBalance,
+} from "../router/wallet/db";
 
 type SwapTokenType = {
   userId: bigint;
   userPrivateKey: string; // stringified private key of user
   userWalletAddress: string;
   userTargetWallet: string | null;
-  from: wallet_type;
-  to: wallet_type;
+  from: WalletType;
+  to: WalletType;
   amount: number;
 };
 
@@ -30,50 +33,67 @@ export const swapToken = async ({
 
   // Convert amount from `from` to equivalent in `to`
   const convertedAmount = await convertCurrency(amount, from, to);
-  // Get admin wallet with enough `to` balance
-  const admin = await getAdminWithMinBalance(to, convertedAmount);
-  if (!admin) {
-    console.log("Not enough admin balance");
-    return;
-  }
 
   const sendFromUser = walletSendMap[from];
   const sendFromAdmin = walletSendMap[to];
 
-  // Step 1: User sends `amount` of `from` token to admin
-  const sent = await sendFromUser(
-    admin.wallet_address,
-    amount.toString(),
-    userId,
-    userPrivateKey,
-  );
-  if (!sent) {
-    console.log("Transfer from user to admin failed");
-    return;
-  }
+  // Get admin wallet with enough `to` balance
+  if (to == "SOL") {
+    const admin = await getAdminWithMinBalance(to, convertedAmount);
+    if (!admin) {
+      console.log("Not enough admin balance");
+      return false;
+    }
+    console.log(admin);
+    await decrementUserBalance(userId, amount.toString(), from);
 
-  // Step 2: Admin sends `convertedAmount` of `to` token to user
-  const sentBack = await sendFromAdmin(
-    userTargetWallet,
-    convertedAmount.toString(),
-    userId,
-    admin.private_key,
-  );
-  if (!sentBack) {
-    console.log("Admin to user failed, refunding...");
+    const sent = await sendFromAdmin(
+      userTargetWallet,
+      convertedAmount.toString(),
+      userId,
+      admin.private_key
+    );
 
-    // Simulate refund (admin sends back the original amount to user)
-    await sendFromAdmin(
-      userWalletAddress,
+    if (sent.state === "FAILURE") {
+      console.log("Transfer from user to admin failed");
+      await incrementUserBalance(userWalletAddress, amount.toString());
+      return false;
+    }
+    console.log(
+      `Swap successful: ${amount} ${from} → ${convertedAmount} ${to}`
+    );
+    return true;
+  } else if (from == "SOL") {
+    const admin = await getAdminWithMinBalance(from, 0);
+    if (!admin) {
+      console.log("Not enough admin balance");
+      return false;
+    }
+    const sent = await sendFromUser(
+      admin.wallet_address,
       amount.toString(),
       userId,
-      admin.private_key,
+      userPrivateKey
     );
-    console.log("Refund done");
-    return;
-  }
 
-  console.log(`Swap successful: ${amount} ${from} → ${convertedAmount} ${to}`);
+    if (sent.state === "FAILURE") {
+      console.log("Transfer from user to admin failed");
+      return false;
+    }
+
+    await incrementUserBalance(userTargetWallet, convertedAmount.toString());
+    console.log(
+      `Swap successful: ${amount} ${from} → ${convertedAmount} ${to}`
+    );
+    return true;
+  } else {
+    console.log("Entered swap");
+    await decrementUserBalance(userId, amount.toString(), from);
+    console.log("decremented", userTargetWallet);
+    await incrementUserBalance(userTargetWallet, convertedAmount.toString());
+    console.log("incremented");
+    return true;
+  }
 };
 
 export const buyCoins = async (
@@ -82,15 +102,14 @@ export const buyCoins = async (
   amount: number,
   walletType: WalletType
 ): Promise<"SUCCESS" | "FAILURE"> => {
-  
   let admin;
 
-  if (walletType == "SOL"){
+  if (walletType == "SOL") {
     admin = await getAdminWithMinBalance(walletType, amount);
-  if (!admin) {
-    console.log("Not enough admin balance");
-    return "FAILURE";
-  }
+    if (!admin) {
+      console.log("Not enough admin balance");
+      return "FAILURE";
+    }
   }
 
   const buyFrom = walletBuyMap[walletType];
@@ -99,7 +118,7 @@ export const buyCoins = async (
     userWalletAddress,
     amount.toString(),
     userId,
-    admin?.private_key,
+    admin?.private_key
   );
 
   return status.state;

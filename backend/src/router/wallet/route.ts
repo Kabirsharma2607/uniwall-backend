@@ -13,6 +13,7 @@ import {
   buyCoinSchema,
   selectedWalletSchema,
   sendCoinSchema,
+  swapCoinSchema,
 } from "@kabir.26/uniwall-commons";
 import Decimal from "decimal.js";
 import {
@@ -24,7 +25,7 @@ import {
 } from "./db";
 import { createQrCodesForSelectedWallets } from "./utils";
 import { getConversionRates } from "../../action-items/utils";
-import { buyCoins } from "../../action-items";
+import { buyCoins, swapToken } from "../../action-items";
 
 const router = Router();
 
@@ -184,8 +185,6 @@ router.get("/get-wallets-with-balance", async (req: Request, res: Response) => {
 
 router.post("/send-coin", async (req: Request, res: Response) => {
   try {
-    console.log("called");
-
     const { success, error, data } = sendCoinSchema.safeParse(req.body);
     if (!success || error) {
       res.status(400).send({
@@ -328,6 +327,56 @@ router.post("/buy-coin", async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       message: `${amount} ${walletType} has been deposited to your account with address ${selectedWallet.walletPublicAddress}`,
+    });
+    return;
+  } catch (e) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server error",
+    });
+    return;
+  }
+});
+
+router.post("/swap-coin", async (req: Request, res: Response) => {
+  try {
+    const { success, error, data } = swapCoinSchema.safeParse(req.body);
+    if (!success || error) {
+      res.status(400).send({
+        success: false,
+        message: "Invalid body schema",
+      });
+      return;
+    }
+
+    const { fromWalletType, toWalletType, amount } = data;
+
+    const user = await getUser(req.userId);
+
+    const fromWallet = await getWalletAddress(user.rowId, fromWalletType);
+
+    const toWallet = await getWalletAddress(user.rowId, toWalletType);
+
+    const result = await swapToken({
+      userPrivateKey: fromWallet.privateKey,
+      userWalletAddress: fromWallet.publicKey,
+      userTargetWallet: toWallet.publicKey,
+      from: fromWalletType,
+      to: toWalletType,
+      amount: Number(amount),
+      userId: user.rowId,
+    });
+    console.log(result);
+    if (!result) {
+      res.status(500).json({
+        success: false,
+        message: "Internal Server error",
+      });
+      return;
+    }
+    res.status(200).send({
+      success: true,
+      message: `Swap successful from ${fromWalletType} -> to ${toWalletType}`,
     });
     return;
   } catch (e) {

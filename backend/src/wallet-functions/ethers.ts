@@ -1,4 +1,4 @@
-import { ethers, AlchemyProvider } from "ethers";
+import { ethers } from "ethers";
 import { GeneratedWalletType } from "../types";
 import dotenv from "dotenv";
 import { getUserWalletBalance, updateWalletBalance } from "../router/wallet/db";
@@ -20,14 +20,14 @@ export const getEthereumBalance = async (address: string): Promise<string> => {
   // const balance = await provider.getBalance(address);
   // return ethers.formatEther(balance); // returns balance in ETH
   const ethBalance = await getUserWalletBalance("ETH", address);
-  console.log("ETH balance", ethBalance)
+  console.log("ETH balance", ethBalance);
   return ethBalance.toFixed(8);
 };
 
 export const sendEther = async (
   receiverPublicKey: string,
   amountInETH: string,
-  userId: bigint,
+  userId: bigint
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;
@@ -55,7 +55,7 @@ export const sendEther = async (
 export const buyEther = async (
   receiverPublicKey: string,
   amountInETH: string,
-  userId: bigint,
+  userId: bigint
 ): Promise<{
   state: "SUCCESS" | "FAILURE";
   signature?: string;

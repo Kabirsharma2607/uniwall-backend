@@ -192,7 +192,7 @@ const sendBalance = async (
   });
 };
 
-const incrementUserBalance = async (
+export const incrementUserBalance = async (
   receiverPublicAddress: string,
   amount: string
 ) => {
@@ -210,7 +210,7 @@ const incrementUserBalance = async (
   });
 };
 
-const decrementUserBalance = async (
+export const decrementUserBalance = async (
   userId: bigint,
   amount: string,
   walletType: WalletType

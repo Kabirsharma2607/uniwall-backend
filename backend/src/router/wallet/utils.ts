@@ -152,11 +152,7 @@ export const sendCoinFromOneWalletToAnother = async (
 }> => {
   switch (walletType) {
     case "BTC":
-      return sendBitcoin(
-        receiverPublicAddress,
-        amount,
-        userId,
-      );
+      return sendBitcoin(receiverPublicAddress, amount, userId);
     case "ETH":
       return sendEther(receiverPublicAddress, amount, userId);
     case "PALO":

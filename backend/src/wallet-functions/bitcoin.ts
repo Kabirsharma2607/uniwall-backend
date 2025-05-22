@@ -2,8 +2,6 @@ import * as bitcoin from "bitcoinjs-lib";
 import * as ecc from "tiny-secp256k1";
 import { ECPairFactory } from "ecpair";
 import { GeneratedWalletType } from "../types";
-import axios from "axios";
-import { Prisma } from "@prisma/client";
 import { getUserWalletBalance, updateWalletBalance } from "../router/wallet/db";
 
 // Create ECPair instance with ecc
