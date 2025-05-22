@@ -191,7 +191,7 @@ export const createQrCodesForSelectedWallets = async (
     );
 
     if (qr.success && qr.qrCode) {
-      createQrEntryInDB(wallet.walletRowId, qr.qrCode);
+      await createQrEntryInDB(wallet.walletRowId, qr.qrCode);
     } else {
       console.log(
         `Failed to generate QR for wallet: ${wallet.walletPublicKey}`
