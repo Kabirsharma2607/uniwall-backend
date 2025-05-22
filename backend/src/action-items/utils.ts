@@ -1,25 +1,33 @@
 import { WalletType } from '@kabir.26/uniwall-commons';
-import axios from 'axios';
+// import axios from 'axios';
 import { CurrencyRate } from '../types';
 import { getUserWallets } from '../router/wallet/db';
 
-const COINGECKO_IDS: Record<WalletType, string> = {
-  'SOL': 'solana',
-  'ETH': 'ethereum',
-  'BTC': 'bitcoin',
-  'PALO': 'polkadot', // Assuming PALO maps to Polkadot
-};
+// const COINGECKO_IDS: Record<WalletType, string> = {
+//   'SOL': 'solana',
+//   'ETH': 'ethereum',
+//   'BTC': 'bitcoin',
+//   'PALO': 'polkadot', // Assuming PALO maps to Polkadot
+// };
+
+const USDPrice = {
+  "SOL" : 176.63,
+  "ETH" : 2663.31,
+  "PALO" : 4.90,
+  "BTC" : 111754.80,
+}
 
 const getUsdPrice = async (wallet: WalletType): Promise<number> => {
-  const id = COINGECKO_IDS[wallet];
-  if (!id) throw new Error(`Invalid wallet type: ${wallet}`);
+  // const id = COINGECKO_IDS[wallet];
+  // if (!id) throw new Error(`Invalid wallet type: ${wallet}`);
 
-  const { data } = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
-    params: { ids: id, vs_currencies: 'usd' },
-  });
+  // const { data } = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
+  //   params: { ids: id, vs_currencies: 'usd' },
+  // });
 
-  const price = data[id]?.usd;
-  if (typeof price !== 'number') throw new Error(`No USD price for ${id}`);
+  // const price = data[id]?.usd;
+  const price = USDPrice[wallet];
+  // if (typeof price !== 'number') throw new Error(`No USD price for ${id}`);
   return price;
 };
 
