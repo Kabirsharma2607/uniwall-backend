@@ -136,8 +136,8 @@ export const getUserWalletQrCodes = async (
   }));
 };
 
-export const createQrEntryInDB = (rowId: bigint, qrCode: string) => {
-  prisma.user_wallets_qr_codes.create({
+export const createQrEntryInDB = async (rowId: bigint, qrCode: string) => {
+  await prisma.user_wallets_qr_codes.create({
     data: {
       wallet_id: rowId,
       qr_code_url: qrCode,
